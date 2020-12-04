@@ -40,12 +40,12 @@ export default {
             use: rule.use.reduce((acc, loader) => {
               loader !== MiniCssExtractPlugin.loader ? acc.push(loader) : acc.push(
                 'style-loader');
-    
+
               return acc;
             }, []),
           };
         }
-    
+
         return rule;
       });
 
@@ -55,6 +55,8 @@ export default {
           "src",
           "index"
       );
+
+      delete config.resolve.alias['url'];
 
       if (env.production) {
         config.output.libraryTarget = 'umd';
