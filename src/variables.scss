@@ -1,0 +1,54 @@
+$css-prefix: x-spreadsheet;
+// color
+$red-color: #DB2828;
+$red-hover-color: #d01919;
+$orange-color: #F2711C;
+$orange-hover-color: #f26202;
+$yellow-color: #FBBD08;
+$yellow-hover-color: #eaae00;
+$olive-color: #B5CC18;
+$olive-hover-color: #a7bd0d;
+$green-color: #21BA45;
+$green-hover-color: #16ab39;
+$teal-color: #00B5AD;
+$teal-hover-color: #009c95;
+$blue-color: #2185D0;
+$blue-hover-color: #1678c2;
+$violet-color: #6435C9;
+$violet-hover-color: #5829bb;
+$purple-color: #A333C8;
+$purple-hover-color: #9627ba;
+$pink-color: #E03997;
+$pink-hover-color: #e61a8d;
+$brown-color: #A5673F;
+$brown-hover-color: #975b33;
+$grey-color: #767676;
+$grey-hover-color: #838383;
+$dark-color: #343a40;
+$dark-hover-color: darken($dark-color, 10%);
+$black-color: #1B1C1D;
+$black-hover-color: #27292a;
+
+// base
+$border-style: 1px solid #e0e2e4;
+$icon-size: 18px;
+$line-height: 1.25em;
+$border-color: #e9e9e9;
+$border: 1px solid $border-color;
+$input-border: $border;
+$input-padding: 0.5em 0.75em;
+$input-box-shadow: inset 0 1px 2px hsla(0,0%,4%,.06);
+$border-radius: 2px;
+$form-field-height: 30px;
+$primary-color: $blue-color;
+$primary-hover-color: $blue-hover-color;
+
+// method
+@mixin type-primary() {
+  color: #fff;
+  background-color: $primary-color;
+  &:hover, &.active {
+    color: #fff;
+    background-color: $primary-hover-color;
+  }
+}
