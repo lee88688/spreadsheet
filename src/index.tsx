@@ -1,7 +1,8 @@
-import habitat from "preact-habitat";
+import habitat from 'preact-habitat';
 import { h, Component } from 'preact';
 import styles from './index.scss';
-import BottomBar from "./components/bottomBar";
+import BottomBar from './components/bottomBar';
+import Sheet from './components/sheet';
 
 class SpreadSheet extends Component<any, any>{
   constructor(props: any) {
@@ -12,6 +13,7 @@ class SpreadSheet extends Component<any, any>{
   render() {
     return (
       <div className="spreadsheet" onContextMenu={e => e.preventDefault()}>
+        <Sheet />
         <BottomBar/>
       </div>
     );

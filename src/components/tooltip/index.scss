@@ -1,0 +1,30 @@
+$tooltip-background: rgba(0, 0, 0, 1);
+
+.tooltipWrap {
+  display: inline-block;
+
+  .tooltip {
+    font-family: inherit;
+    padding: 5px 10px;
+    color: #fff;
+    border-radius: 1px;
+    background: $tooltip-background;
+    font-size: 12px;
+    z-index: 201;
+
+    &::before {
+      pointer-events: none;
+      position: absolute;
+      left: 50%;
+      top: -5px;
+      content: "";
+      border: 5px solid $tooltip-background;
+      border-top: none;
+      border-left-color: transparent;
+      border-right-color: transparent;
+      transform: translate(-50%);
+      z-index: 1;
+      box-shadow: 1px 1px 3px -1px rgba(0, 0, 0, .3);
+    }
+  }
+}

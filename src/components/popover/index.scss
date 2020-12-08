@@ -1,0 +1,16 @@
+.popover {
+  position: relative;
+}
+
+.content {
+  display: none;
+  position: absolute;
+
+  &[data-show] {
+    display: block;
+  }
+
+  &.visible {
+    display: block;
+  }
+}

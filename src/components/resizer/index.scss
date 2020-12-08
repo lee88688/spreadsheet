@@ -1,0 +1,28 @@
+.resizer {
+  position: absolute;
+  z-index: 11;
+
+  .resizerHover {
+    background-color: rgba(75, 137, 255, .25);
+  }
+  .resizerLine {
+    position: absolute;
+  }
+
+  &.horizontal {
+    cursor: row-resize;
+    .resizerLine {
+      border-bottom: 2px dashed rgb(75, 137, 255);
+      left: 0;
+      bottom: 0;
+    }
+  }
+  &.vertical {
+    cursor: col-resize;
+    .resizerLine {
+      border-right: 2px dashed rgb(75, 137, 255);
+      top: 0;
+      right: 0;
+    }
+  }
+}

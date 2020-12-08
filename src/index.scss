@@ -1,6 +1,11 @@
 @import "./variables";
 
 .spreadsheet {
+  display: flex;
+  flex-direction: column;
+  align-content: stretch;
+  justify-content: flex-start;
+  height: 100%;
   font-size: 13px;
   line-height: normal;
   user-select: none;
