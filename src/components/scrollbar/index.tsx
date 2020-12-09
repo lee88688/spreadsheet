@@ -26,7 +26,7 @@ export default class Scrollbar extends Component<ScrollbarProps, ScrollbarState>
   scrollEl = createRef<HTMLDivElement>()
 
   constructor(props: ScrollbarProps) {
-    super();
+    super(props);
     this.state = { ...props, distance: 0, contentDistance: 0, visible: false };
     this.isVertical = props.direction === 'vertical';
   }

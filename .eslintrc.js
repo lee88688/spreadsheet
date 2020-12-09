@@ -23,7 +23,8 @@ module.exports = {
     "semi": "error",
     "quotes": ["error", "single"],
     "no-spaced-func": "error",
-    "comma-style": ["error", "last"]
+    "comma-style": ["error", "last"],
+    "object-curly-spacing": ["error", "always"]
   },
   settings: {
     react: {

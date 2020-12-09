@@ -14,16 +14,16 @@ interface ResizerProps {
   visible: boolean;
   direction: 'vertical' | 'horizontal';
   minDistance: number;
-  rect: ResizerRect;
-  line: { width: number; height: number };
-  onResizeEnd: Function;
+  rect?: ResizerRect;
+  line?: { width: number; height: number };
+  onResizeEnd?: Function;
 }
 
 export default function Resizer(props: ResizerProps) {
   const [rect, setRect] = useState<ResizerRect>({ top: 0, left: 0, width: 0, height: 0 });
 
   useEffect(() => {
-    if (props.visible) {
+    if (props.visible && props.rect) {
       setRect(props.rect);
     }
   }, [props.visible]);
@@ -65,8 +65,8 @@ export default function Resizer(props: ResizerProps) {
       <div
         className={styles.resizerLine}
         style={{
-          width: `${isVertical ? 0 : props.line.width}px`,
-          height: `${isVertical ? props.line.height : 0}px`
+          width: `${isVertical ? 0 : props.line?.width}px`,
+          height: `${isVertical ? props.line?.height : 0}px`
         }}
       />
     </div>
