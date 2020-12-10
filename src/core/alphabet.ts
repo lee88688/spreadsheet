@@ -65,7 +65,7 @@ export function xy2expr(x: number, y: number) {
  * @param yn
  * @param condition
  */
-export function expr2expr(src: string, xn: number, yn: number, condition: (x: number, y: number) => true = () => true) {
+export function expr2expr(src: string, xn: number, yn: number, condition: (x: number, y: number) => boolean = () => true) {
   if (xn === 0 && yn === 0) return src;
   const [x, y] = expr2xy(src);
   if (!condition(x, y)) return src;
