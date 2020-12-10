@@ -1,9 +1,10 @@
 import helper from './helper';
 import { expr2expr } from './alphabet';
 import { CellRange } from './cellRange';
+import { Cell, Cells, Row } from './index';
 
-type DeleteCellType = 'all' | 'text' | 'format' | 'merge';
-type CopyCellType = 'all' | 'format' | 'text';
+export type DeleteCellType = 'all' | 'text' | 'format' | 'merge';
+export type CopyCellType = 'all' | 'format' | 'text';
 type RowsDataType = { [key: number]: Row };
 
 export class Rows {

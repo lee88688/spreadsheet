@@ -1,11 +1,14 @@
-interface FontSetting {
+export interface FontSetting {
   name: 'Arial';
   size: number;
   bold: boolean;
   italic: boolean;
 }
 
-interface StyleSetting {
+export type RowAlignType = 'left' | 'center' | 'right'
+export type ColAlignType = 'top' | 'middle' | 'bottom'
+
+export interface StyleSetting {
   bgcolor: string;
   align: 'left';
   valign: 'middle';
@@ -17,7 +20,7 @@ interface StyleSetting {
   format: 'normal';
 }
 
-interface SheetSetting {
+export interface SheetSetting {
   mode: 'edit' | 'read';
   view: {
     height: () => number;
@@ -39,26 +42,27 @@ interface SheetSetting {
   style: StyleSetting;
 }
 
-interface Cell {
+export interface Cell {
   style: number;
   type: string;
   text: string;
   value: string; // cal result
   merge?: number[];
+  editable?: boolean;
 }
 
-interface Cells {
+export interface Cells {
   [key: number]: Cell;
 }
 
-interface Row {
+export interface Row {
   height: number;
   style: number;
   hide?: boolean;
   cells: Cells;
 }
 
-interface Col {
+export interface Col {
   width: number;
   style: number;
   hide?: boolean;

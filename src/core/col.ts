@@ -1,4 +1,5 @@
 import helper from './helper';
+import { Col } from './index';
 
 type ColsDataType = { [key: number]: Col }
 
