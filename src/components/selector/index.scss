@@ -1,0 +1,53 @@
+.selectors {}
+
+.selector {
+  box-sizing: content-box;
+  position: absolute;
+  overflow: hidden;
+  pointer-events: none;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.selector {
+  .hideInput {
+    position: absolute;
+    z-index: 0;
+    input {
+      padding: 0;
+      width: 0;
+      border: none!important;
+    }
+  }
+  .selectorArea {
+    position: absolute;
+    border: 2px solid rgb(75, 137, 255);
+    background: rgba(75, 137, 255, .1);
+    z-index: 5;
+  }
+  .selectorClipboard, .selectorAutofill {
+    position: absolute;
+    background: transparent;
+    z-index: 100;
+  }
+  .selectorClipboard {
+    border: 2px dashed rgb(75, 137, 255);
+  }
+  .selector-autofill {
+    border: 1px dashed rgba(0, 0, 0, .45); // #606060; // rgba(0, 0, 0, .2);
+  }
+  .selectorCorner {
+    pointer-events: auto;
+    position: absolute;
+    cursor: crosshair;
+    font-size: 0;
+    height: 5px;
+    width: 5px;
+    right: -5px;
+    bottom: -5px;
+    border: 2px solid rgb(255, 255, 255);
+    background: rgb(75, 137, 255);
+  }
+}

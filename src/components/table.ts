@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Draw, DrawBox, npx, thinLineWidth } from '../canvas/draw';
-import DataProxy from './dataProxy';
-import { cellRender } from './cell';
-import { formatm } from './format';
-import { formulam } from './formula';
-import { CellRange } from './cellRange';
-import { getFontSizePxByPt } from './font';
-import { stringAt } from './alphabet';
+import DataProxy from '../core/dataProxy';
+import { cellRender } from '../core/cell';
+import { formatm } from '../core/format';
+import { formulam } from '../core/formula';
+import { CellRange } from '../core/cellRange';
+import { getFontSizePxByPt } from '../core/font';
+import { stringAt } from '../core/alphabet';
 
 const cellPaddingWidth = 5;
 const tableFixedHeaderCleanStyle = { fillStyle: '#f4f5f8' };

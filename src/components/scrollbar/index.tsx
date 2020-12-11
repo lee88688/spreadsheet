@@ -1,63 +1,65 @@
-import { h, Component, createRef } from 'preact';
+import { h } from 'preact';
+import { useCallback, useRef, useImperativeHandle } from 'preact/hooks';
+import { forwardRef } from 'preact/compat';
 import styles from './index.scss';
 import clsx from 'clsx';
 
 interface ScrollbarProps {
   direction: 'vertical' | 'horizontal';
   onScroll?: (isVertical: boolean, scroll: number, event: UIEvent) => void;
-}
-
-interface ScrollbarState extends ScrollbarProps {
-  visible: boolean;
   distance: number;
   contentDistance: number;
 }
 
-export default class Scrollbar extends Component<ScrollbarProps, ScrollbarState>{
-  isVertical: boolean;
-  scrollHandler = (e: UIEvent) => {
+const mousemoveHandler = (e: MouseEvent) => e.stopPropagation();
+
+const Scrollbar = forwardRef(function Scrollbar(props: ScrollbarProps, ref) {
+  const isVertical = props.direction === 'vertical';
+
+  const scrollEl = useRef<HTMLDivElement>();
+  const scrollHandler = useCallback((e: UIEvent) => {
     e.stopPropagation();
     const { scrollTop, scrollLeft } = e.target as HTMLElement;
-    if (this.state.onScroll) {
-      this.state.onScroll(this.isVertical, this.isVertical ? scrollTop : scrollLeft, e);
+    if (props.onScroll) {
+      props.onScroll(isVertical, isVertical ? scrollTop : scrollLeft, e);
     }
-  }
-  mousemoveHandler = (e: MouseEvent) => e.stopPropagation()
-  scrollEl = createRef<HTMLDivElement>()
+  }, [props.onScroll]);
 
-  constructor(props: ScrollbarProps) {
-    super(props);
-    this.state = { ...props, distance: 0, contentDistance: 0, visible: false };
-    this.isVertical = props.direction === 'vertical';
-  }
-
-  move(x: number, y: number) {
-    this.scrollEl.current?.scroll(x, y);
-  }
-
-  set(distance: number, contentDistance: number) {
-    const d = distance - 1;
-    if (contentDistance > d) {
-      this.setState({ distance: d - 15, contentDistance, visible: true });
-    } else {
-      this.setState({ visible: false });
+  useImperativeHandle(ref, () => ({
+    move(x: number, y: number) {
+      scrollEl.current?.scroll(x, y);
     }
+  }), [scrollEl]);
+
+  const d = props.distance - 1;
+  let visible = false;
+  let distance = 0;
+  let contentDistance = 0;
+  if (props.contentDistance > d) {
+    distance = d - 15;
+    contentDistance = props.contentDistance;
+    visible = true;
   }
 
-  render() {
-    return (
+  return (
+    <div
+      ref={scrollEl}
+      className={clsx(styles.scrollbar, isVertical ? styles.vertical : styles.horizontal)}
+      style={{
+        display: visible ? 'block' : 'none',
+        [isVertical ? 'height' : 'width']: `${distance}px`
+      }}
+      onMouseMove={mousemoveHandler}
+      onScroll={scrollHandler}
+    >
       <div
-        ref={this.scrollEl}
-        className={clsx(styles.scrollbar, this.isVertical ? styles.vertical : styles.horizontal)}
         style={{
-          display: this.state.visible ? 'block' : 'none',
-          [this.isVertical ? 'width' : 'height']: `${this.state.distance}px`
+          [isVertical ? 'height' : 'width']: `${contentDistance}px`,
+          [isVertical ? 'width' : 'height']: '1px'
         }}
-        onMouseMove={this.mousemoveHandler}
-        onScroll={this.scrollHandler}
-      >
-        <div style={{ [this.isVertical ? 'height' : 'width']: `${this.state.contentDistance}px` }}/>
-      </div>
-    );
-  }
-}
+      />
+    </div>
+  );
+});
+
+export default Scrollbar;

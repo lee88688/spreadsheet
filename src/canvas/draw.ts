@@ -132,7 +132,7 @@ class Draw {
   constructor(el: HTMLCanvasElement, width: number, height: number) {
     this.el = el;
     this.ctx = el.getContext('2d') as CanvasRenderingContext2D;
-    this.resize(width, height);
+    // this.resize(width, height); // fixme: remove resize
     this.ctx?.scale(dpr(), dpr());
   }
 

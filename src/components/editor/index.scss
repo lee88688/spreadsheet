@@ -1,0 +1,46 @@
+.editor {
+  box-sizing: content-box;
+  position: absolute;
+  overflow: hidden;
+  pointer-events: none;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 20;
+
+  .editorArea {
+    position: absolute;
+    text-align: left;
+    border: 2px solid rgb(75, 137, 255);
+    line-height: 0;
+    z-index: 100;
+    pointer-events: auto;
+
+    textarea {
+      box-sizing: content-box;
+      border: none;
+      padding: 0 3px;
+      outline: none;
+      resize: none;
+      text-align: start;
+      overflow-y: hidden;
+      font: 400 13px Arial, 'Lato', 'Source Sans Pro', Roboto, Helvetica, sans-serif;
+      color: inherit;
+      white-space: normal;
+      word-wrap: break-word;
+      line-height: 22px;
+      margin: 0;
+    }
+
+    .textLine {
+      overflow: hidden;
+      visibility: hidden;
+      position: fixed;
+      top: 0;
+      left: 0;
+    }
+
+    .suggest {}
+  }
+}
