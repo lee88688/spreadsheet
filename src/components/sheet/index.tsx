@@ -1,4 +1,4 @@
-import { h, Component, createRef }  from 'preact';
+import { h, Component, createRef, createContext }  from 'preact';
 import Resizer from '../resizer';
 import Scrollbar from '../scrollbar';
 import styles from './index.scss';
@@ -15,6 +15,8 @@ interface SheetState {
   verticalScrollBar?: { distance: number; contentDistance: number };
   horizontalScrollBar?: { distance: number; contentDistance: number };
 }
+
+export const SheetContext = createContext<{ data?: DataProxy }>({});
 
 export default class Sheet extends Component<any, SheetState>{
   eventMap = new Map()
@@ -80,27 +82,29 @@ export default class Sheet extends Component<any, SheetState>{
     };
 
     return (
-      <div className={styles.sheet}>
-        <canvas ref={this.canvasRef} className={styles.table} style={rectStyle}/>
-        <div class={styles.overlay} style={rectStyle}>
-          <div className={styles.overlayContent} style={offsetStyle}>
-            <Editor visible={false}/>
-            <Selector/>
+      <SheetContext.Provider value={this.state}>
+        <div className={styles.sheet}>
+          <canvas ref={this.canvasRef} className={styles.table} style={rectStyle}/>
+          <div class={styles.overlay} style={rectStyle}>
+            <div className={styles.overlayContent} style={offsetStyle}>
+              <Editor visible={false}/>
+              <Selector main={}/>
+            </div>
           </div>
+          <Resizer visible={false} direction="horizontal" minDistance={0}/>
+          <Resizer visible={false} direction="vertical" minDistance={0}/>
+          <Scrollbar
+            direction="vertical"
+            distance={this.state.verticalScrollBar?.distance ?? 0}
+            contentDistance={this.state.verticalScrollBar?.contentDistance ?? 0}
+          />
+          <Scrollbar
+            direction="horizontal"
+            distance={this.state.horizontalScrollBar?.distance ?? 0}
+            contentDistance={this.state.horizontalScrollBar?.contentDistance ?? 0}
+          />
         </div>
-        <Resizer visible={false} direction="horizontal" minDistance={0}/>
-        <Resizer visible={false} direction="vertical" minDistance={0}/>
-        <Scrollbar
-          direction="vertical"
-          distance={this.state.verticalScrollBar?.distance ?? 0}
-          contentDistance={this.state.verticalScrollBar?.contentDistance ?? 0}
-        />
-        <Scrollbar
-          direction="horizontal"
-          distance={this.state.horizontalScrollBar?.distance ?? 0}
-          contentDistance={this.state.horizontalScrollBar?.contentDistance ?? 0}
-        />
-      </div>
+      </SheetContext.Provider>
     );
   }
 }
