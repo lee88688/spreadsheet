@@ -34,6 +34,7 @@
     "@typescript-eslint/parser": "^2.24.0",
     "clsx": "^1.1.1",
     "eslint-plugin-react": "^7.19.0",
+    "events": "^3.2.0",
     "preact": "^10.3.4",
     "preact-compat": "^3.17.0",
     "preact-habitat": "^3.1.0",

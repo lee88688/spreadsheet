@@ -1,7 +1,14 @@
 import { h } from 'preact';
-import { useState, useEffect, useCallback } from 'preact/hooks';
+import { useState, useEffect, useCallback, useContext } from 'preact/hooks';
 import styles from './index.scss';
 import clsx from 'clsx';
+import { SheetContext } from '../sheet';
+import { EventTypes, ResizerVisibleEventParams } from '../index';
+
+export enum ResizerDirectionType {
+  vertical = 'vertical', // col resizer
+  horizontal = 'horizontal' // row resizer
+}
 
 interface ResizerRect {
   top: number;
@@ -11,8 +18,7 @@ interface ResizerRect {
 }
 
 interface ResizerProps {
-  visible: boolean;
-  direction: 'vertical' | 'horizontal';
+  direction: ResizerDirectionType;
   minDistance: number;
   rect?: ResizerRect;
   line?: { width: number; height: number };
@@ -20,13 +26,17 @@ interface ResizerProps {
 }
 
 export default function Resizer(props: ResizerProps) {
-  const [rect, setRect] = useState<ResizerRect>({ top: 0, left: 0, width: 0, height: 0 });
-
-  useEffect(() => {
-    if (props.visible && props.rect) {
-      setRect(props.rect);
-    }
-  }, [props.visible]);
+  const [params, setParams] = useState<ResizerVisibleEventParams>({
+    direction: props.direction,
+    visible: false
+  });
+  const { events } = useContext(SheetContext);
+  const {
+    visible,
+    unhideVisible = false,
+    line = { width: 0, height: 0 },
+    rect = { left: 0, top: 0, height: 0, width: 0 }
+  } = params;
 
   const isVertical = props.direction === 'vertical';
 
@@ -35,10 +45,22 @@ export default function Resizer(props: ResizerProps) {
     const distance = isVertical ? rect.width : rect.height;
   };
 
+  useEffect(() => {
+    const fn = (param: ResizerVisibleEventParams) => {
+      if (param.direction !== props.direction) return;
+      setParams(param);
+    };
+    events.on(EventTypes.ResizerVisible, fn);
+    return () => {
+      events.off(EventTypes.ResizerVisible, fn);
+    };
+  }, [events, props.direction]);
+
   return (
     <div
-      className={clsx(styles.resizer, props.direction === 'vertical' ? styles.vertical : styles.horizontal)}
+      className={clsx(styles.resizer, isVertical ? styles.vertical : styles.horizontal)}
       style={{
+        display: visible ? 'block' : 'none',
         left: `${isVertical ? rect.left + rect.width - 5 : rect.left}px`,
         top: `${isVertical ? rect.top : rect.top + rect.height - 5}px`
       }}
@@ -47,6 +69,7 @@ export default function Resizer(props: ResizerProps) {
       <div
         className={styles.resizerHover}
         style={{
+          display: unhideVisible ? 'block' : 'none',
           left: `${isVertical ? 5 - rect.width : rect.left}px`,
           top: `${isVertical ? rect.top : 5 - rect.height}px`,
           width: `${isVertical ? 5 : rect.width}px`,
@@ -57,7 +80,7 @@ export default function Resizer(props: ResizerProps) {
       <div
         className={styles.resizerHover}
         style={{
-          width: `${isVertical ? 0 : rect.width}px`,
+          width: `${isVertical ? 5 : rect.width}px`,
           height: `${isVertical ? rect.height : 5}px`
         }}
       />
@@ -65,8 +88,9 @@ export default function Resizer(props: ResizerProps) {
       <div
         className={styles.resizerLine}
         style={{
-          width: `${isVertical ? 0 : props.line?.width}px`,
-          height: `${isVertical ? props.line?.height : 0}px`
+          display: 'none',
+          width: `${isVertical ? 0 : line.width}px`,
+          height: `${isVertical ? line.height : 0}px`
         }}
       />
     </div>

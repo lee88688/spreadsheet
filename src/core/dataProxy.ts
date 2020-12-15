@@ -12,6 +12,7 @@ import { expr2xy, xy2expr } from './alphabet';
 import AutoFilter from './autoFilter';
 import { t } from '../locale/locale';
 import { SheetSetting, StyleSetting } from './index';
+import Coordinate from './coordinate';
 
 const defaultSettings: SheetSetting = {
   mode: 'edit', // edit | read
@@ -63,6 +64,7 @@ export default class DataProxy {
   cols: Cols
   selector: Selector
   scroll: Scroll
+  coordinate: Coordinate
   history: History
   clipboard: Clipboard
   exceptRowSet: Set<number>
@@ -89,6 +91,7 @@ export default class DataProxy {
     // don't save object
     this.selector = new Selector();
     this.scroll = new Scroll();
+    this.coordinate = new Coordinate(this);
     this.history = new History();
     this.clipboard = new Clipboard();
     this.autoFilter = new AutoFilter();
@@ -578,6 +581,11 @@ export default class DataProxy {
     };
   }
 
+  /**
+   * get Cell index and rect by relative left and top pixels
+   * @param x left pixels
+   * @param y top pixels
+   */
   getCellRectByXY(x: number, y: number) {
     const {
       scroll, merges, rows, cols,
