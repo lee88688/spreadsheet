@@ -1,11 +1,18 @@
 import { h } from 'preact';
-import { useCallback, useRef, useImperativeHandle } from 'preact/hooks';
+import { useCallback, useRef, useImperativeHandle, useContext } from 'preact/hooks';
 import { forwardRef } from 'preact/compat';
 import styles from './index.scss';
 import clsx from 'clsx';
+import { SheetContext } from '../sheet';
+import { EventTypes, ScrollEventParams } from '../index';
+
+export enum ScrollbarDirectionType {
+  vertical = 'vertical', // col scrollbar
+  horizontal = 'horizontal' // row scrollbar
+}
 
 interface ScrollbarProps {
-  direction: 'vertical' | 'horizontal';
+  direction: ScrollbarDirectionType;
   onScroll?: (isVertical: boolean, scroll: number, event: UIEvent) => void;
   distance: number;
   contentDistance: number;
@@ -16,14 +23,19 @@ const mousemoveHandler = (e: MouseEvent) => e.stopPropagation();
 const Scrollbar = forwardRef(function Scrollbar(props: ScrollbarProps, ref) {
   const isVertical = props.direction === 'vertical';
 
+  const { events } = useContext(SheetContext);
   const scrollEl = useRef<HTMLDivElement>();
   const scrollHandler = useCallback((e: UIEvent) => {
     e.stopPropagation();
+    // console.log(e);
     const { scrollTop, scrollLeft } = e.target as HTMLElement;
-    if (props.onScroll) {
-      props.onScroll(isVertical, isVertical ? scrollTop : scrollLeft, e);
-    }
-  }, [props.onScroll]);
+    const params: ScrollEventParams = {
+      direction: isVertical ? ScrollbarDirectionType.vertical : ScrollbarDirectionType.horizontal,
+      scrollLeft: isVertical ? 0 : scrollLeft,
+      scrollTop: isVertical ? scrollTop : 0
+    };
+    events.emit(EventTypes.Scroll, params);
+  }, [events, isVertical]);
 
   useImperativeHandle(ref, () => ({
     move(x: number, y: number) {

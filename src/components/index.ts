@@ -1,4 +1,5 @@
 import { ResizerDirectionType } from './resizer';
+import { ScrollbarDirectionType } from './scrollbar';
 
 export interface ElementOffsetSize {
   left: number;
@@ -26,6 +27,12 @@ export interface ResizerResizeEventParams {
   distance?: number;
 }
 
+export interface ScrollEventParams {
+  direction: ScrollbarDirectionType;
+  scrollTop?: number;
+  scrollLeft?: number;
+}
+
 export enum EventTypes {
   // resizer
   /**
@@ -36,5 +43,11 @@ export enum EventTypes {
   /**
    * @event ResizerResizeEventParams
    */
-  ResizerResize = 'resizer.resize'
+  ResizerResize = 'resizer.resize',
+
+  // scroll
+  /**
+   * @event ScrollEventParams
+   */
+  Scroll = 'scroll'
 }

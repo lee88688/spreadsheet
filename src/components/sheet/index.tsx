@@ -1,7 +1,7 @@
 import { Component, createContext, createRef, h } from 'preact';
 import { EventEmitter } from 'events';
 import Resizer, { ResizerDirectionType } from '../resizer';
-import Scrollbar from '../scrollbar';
+import Scrollbar, { ScrollbarDirectionType } from '../scrollbar';
 import styles from './index.scss';
 import Editor from '../editor';
 import Selector from '../selector';
@@ -164,12 +164,12 @@ export default class Sheet extends Component<any, SheetState>{
           <Resizer direction={ResizerDirectionType.horizontal} minDistance={0}/>
           <Resizer direction={ResizerDirectionType.vertical} minDistance={0}/>
           <Scrollbar
-            direction="vertical"
+            direction={ScrollbarDirectionType.vertical}
             distance={this.state.verticalScrollBar?.distance ?? 0}
             contentDistance={this.state.verticalScrollBar?.contentDistance ?? 0}
           />
           <Scrollbar
-            direction="horizontal"
+            direction={ScrollbarDirectionType.horizontal}
             distance={this.state.horizontalScrollBar?.distance ?? 0}
             contentDistance={this.state.horizontalScrollBar?.contentDistance ?? 0}
           />
