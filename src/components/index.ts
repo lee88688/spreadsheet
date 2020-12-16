@@ -21,6 +21,11 @@ export interface ResizerVisibleEventParams {
   line?: { width: number; height: number };
 }
 
+export interface ResizerResizeEventParams {
+  type: 'start' | 'end';
+  distance?: number;
+}
+
 export enum EventTypes {
   // resizer
   /**
@@ -28,4 +33,8 @@ export enum EventTypes {
    * @example emit(EventTypes.ResizerVisible, { direction: 'vertical', visible: true, unhideVisible: false })
    */
   ResizerVisible = 'resizer.visible',
+  /**
+   * @event ResizerResizeEventParams
+   */
+  ResizerResize = 'resizer.resize'
 }

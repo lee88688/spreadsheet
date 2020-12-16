@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback, useContext } from 'preact/hooks';
 import styles from './index.scss';
 import clsx from 'clsx';
 import { SheetContext } from '../sheet';
-import { EventTypes, ResizerVisibleEventParams } from '../index';
+import { EventTypes, ResizerResizeEventParams, ResizerVisibleEventParams } from '../index';
 
 export enum ResizerDirectionType {
   vertical = 'vertical', // col resizer
@@ -30,6 +30,9 @@ export default function Resizer(props: ResizerProps) {
     direction: props.direction,
     visible: false
   });
+  const [moving, setMoving] = useState(false);
+  const [lineVisible, setLineVisible] = useState(false);
+  // const [mouseEvent, setMouseEvent] = useState<MouseEvent | null>(null);
   const { events } = useContext(SheetContext);
   const {
     visible,
@@ -41,8 +44,44 @@ export default function Resizer(props: ResizerProps) {
   const isVertical = props.direction === 'vertical';
 
   const mousedownHandler = (e: MouseEvent) => {
-    const startEvent = e;
-    const distance = isVertical ? rect.width : rect.height;
+    e.stopPropagation();
+    setLineVisible(true);
+    setMoving(true);
+    // setMouseEvent(e);
+    let mouseEvent = e;
+    let distance = isVertical ? rect.width : rect.height;
+    events.emit(EventTypes.ResizerResize, { type: 'start' } as ResizerResizeEventParams);
+
+    const mouseMoveHandler = (e: MouseEvent) => {
+      // if (!moving) return;
+      if (mouseEvent !== null && e.buttons === 1) {
+        if (isVertical) {
+          distance += e.movementX;
+          if (distance > props.minDistance) {
+            rect.width = distance;
+          }
+        } else {
+          distance += e.movementY;
+          if (distance > props.minDistance) {
+            rect.height = distance;
+          }
+        }
+        setParams({ ...params, rect });
+        // setMouseEvent(e);
+        mouseEvent = e;
+      }
+    };
+
+    const mouseUpHandler = (e: MouseEvent) => {
+      setMoving(false);
+      setLineVisible(false);
+      events.emit(EventTypes.ResizerResize, { type: 'end', distance } as ResizerResizeEventParams);
+      window.removeEventListener('mousemove', mouseMoveHandler);
+      window.removeEventListener('mouseup', mouseUpHandler);
+    };
+
+    window.addEventListener('mousemove', mouseMoveHandler);
+    window.addEventListener('mouseup', mouseUpHandler);
   };
 
   useEffect(() => {
@@ -64,6 +103,7 @@ export default function Resizer(props: ResizerProps) {
         left: `${isVertical ? rect.left + rect.width - 5 : rect.left}px`,
         top: `${isVertical ? rect.top : rect.top + rect.height - 5}px`
       }}
+      onMouseDown={mousedownHandler}
     >
       {/* unhideHoverEl */}
       <div
@@ -88,7 +128,7 @@ export default function Resizer(props: ResizerProps) {
       <div
         className={styles.resizerLine}
         style={{
-          display: 'none',
+          display: lineVisible ? 'block' : 'none',
           width: `${isVertical ? 0 : line.width}px`,
           height: `${isVertical ? line.height : 0}px`
         }}
