@@ -115,6 +115,12 @@ export default class Sheet extends Component<any, SheetState>{
     emitResizerVisibleEvents(colResizerParam);
   }
 
+  mouseoutHandler = (e: MouseEvent) => {
+    const { offsetX, offsetY } = e;
+    if (offsetX <= 0) this.events.emit(EventTypes.ResizerVisible, { visible: false, direction: ResizerDirectionType.vertical } as ResizerVisibleEventParams);
+    if (offsetY <= 0) this.events.emit(EventTypes.ResizerVisible, { visible: false, direction: ResizerDirectionType.horizontal } as ResizerVisibleEventParams);
+  }
+
   mouseScrollHandler = (e: WheelEvent) => {
     e.stopPropagation();
 
@@ -251,7 +257,13 @@ export default class Sheet extends Component<any, SheetState>{
       <SheetContext.Provider value={this.state}>
         <div className={styles.sheet}>
           <canvas ref={this.canvasRef} className={styles.table} style={rectStyle}/>
-          <div class={styles.overlay} style={rectStyle} onMouseMove={this.resizerMouseMoveHandler} onWheel={this.mouseScrollHandler}>
+          <div
+            class={styles.overlay}
+            style={rectStyle}
+            onMouseMove={this.resizerMouseMoveHandler}
+            onMouseOut={this.mouseoutHandler}
+            onWheel={this.mouseScrollHandler}
+          >
             <div className={styles.overlayContent} style={offsetStyle}>
               <Editor visible={false}/>
               <Selector main={this.state.mainSelector}/>

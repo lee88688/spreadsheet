@@ -51,11 +51,11 @@ const Scrollbar = forwardRef(function Scrollbar(props: ScrollbarProps, ref) {
     };
   }, [events, isVertical, props.direction]);
 
-  useImperativeHandle(ref, () => ({
-    move(x: number, y: number) {
-      scrollEl.current?.scroll(x, y);
-    }
-  }), [scrollEl]);
+  // useImperativeHandle(ref, () => ({
+  //   move(x: number, y: number) {
+  //     scrollEl.current?.scroll(x, y);
+  //   }
+  // }), [scrollEl]);
 
   const d = props.distance - 1;
   let visible = false;
