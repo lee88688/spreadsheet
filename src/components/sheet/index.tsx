@@ -7,7 +7,13 @@ import Editor from '../editor';
 import Selector from '../selector';
 import DataProxy from '../../core/dataProxy';
 import Table from '../table';
-import { ElementOffsetSize, EventTypes, ResizerVisibleEventParams } from '../index';
+import {
+  ElementOffsetSize,
+  EventTypes,
+  ResizerVisibleEventParams,
+  ScrollEventParams,
+  ScrollSheetEventParams
+} from '../index';
 import { CellRange } from '../../core/cellRange';
 
 interface SheetState {
@@ -37,6 +43,7 @@ export default class Sheet extends Component<any, SheetState>{
       mainSelector: { visible: false, cellRange: new CellRange(0,0,0,0) }
     };
     // this.table = new Table(this.canvasRef, this.state.data);
+    this.events.on(EventTypes.Scroll, this.scrollHandler);
   }
 
   componentDidMount() {
@@ -108,6 +115,95 @@ export default class Sheet extends Component<any, SheetState>{
     emitResizerVisibleEvents(colResizerParam);
   }
 
+  mouseScrollHandler = (e: WheelEvent) => {
+    e.stopPropagation();
+
+    const { rows, cols } = this.state.data;
+
+    const { deltaY, deltaX, shiftKey } = e;
+
+    const params: ScrollSheetEventParams = {
+      direction: shiftKey ? ScrollbarDirectionType.horizontal : ScrollbarDirectionType.vertical,
+      horizontalDelta: deltaX,
+      verticalDelta: 0
+    };
+    if (shiftKey) {
+      params.horizontalDelta = deltaY;
+    } else {
+      params.verticalDelta = deltaY;
+    }
+    this.state.events.emit(EventTypes.ScrollSheet, params);
+
+    // const loopValue = (ii, vFunc) => {
+    //   let i = ii;
+    //   let v = 0;
+    //   do {
+    //     v = vFunc(i);
+    //     i += 1;
+    //   } while (v <= 0);
+    //   return v;
+    // };
+    //
+    // const moveY = (vertical) => {
+    //   if (vertical > 0) {
+    //     // up
+    //     const ri = data.scroll.ri + 1;
+    //     if (ri < rows.len) {
+    //       const rh = loopValue(ri, i => rows.getHeight(i));
+    //       verticalScrollbar.move({ top: top + rh - 1 });
+    //     }
+    //   } else {
+    //     // down
+    //     const ri = data.scroll.ri - 1;
+    //     if (ri >= 0) {
+    //       const rh = loopValue(ri, i => rows.getHeight(i));
+    //       verticalScrollbar.move({ top: ri === 0 ? 0 : top - rh });
+    //     }
+    //   }
+    // };
+    //
+    // const moveX = (horizontal) => {
+    //   if (horizontal > 0) {
+    //     // left
+    //     const ci = data.scroll.ci + 1;
+    //     if (ci < cols.len) {
+    //       const cw = loopValue(ci, i => cols.getWidth(i));
+    //       horizontalScrollbar.move({ left: left + cw - 1 });
+    //     }
+    //   } else {
+    //     // right
+    //     const ci = data.scroll.ci - 1;
+    //     if (ci >= 0) {
+    //       const cw = loopValue(ci, i => cols.getWidth(i));
+    //       horizontalScrollbar.move({ left: ci === 0 ? 0 : left - cw });
+    //     }
+    //   }
+    // };
+    // const tempY = Math.abs(deltaY);
+    // const tempX = Math.abs(deltaX);
+    // const temp = Math.max(tempY, tempX);
+    //
+    // if (/Firefox/i.test(window.navigator.userAgent)) throttle(moveY(evt.detail), 50);
+    // if (temp === tempX) throttle(moveX(deltaX), 50);
+    // if (temp === tempY) throttle(moveY(deltaY), 50);
+  }
+
+  scrollHandler = (params: ScrollEventParams) => {
+    if (params.direction === ScrollbarDirectionType.vertical) {
+      this.state.data.scrolly(params.scrollTop || 0, () => {
+        // selector.resetBRLAreaOffset();
+        // editorSetOffset.call(this);
+        this.table?.render();
+      });
+    } else {
+      this.state.data.scrollx(params.scrollLeft ?? 0, () => {
+        // selector.resetBRTAreaOffset();
+        // editorSetOffset.call(this);
+        this.table?.render();
+      });
+    }
+  }
+
   private reset() {
     const rect = this.getRect();
     const offset = this.getTableOffset();
@@ -155,7 +251,7 @@ export default class Sheet extends Component<any, SheetState>{
       <SheetContext.Provider value={this.state}>
         <div className={styles.sheet}>
           <canvas ref={this.canvasRef} className={styles.table} style={rectStyle}/>
-          <div class={styles.overlay} style={rectStyle} onMouseMove={this.resizerMouseMoveHandler}>
+          <div class={styles.overlay} style={rectStyle} onMouseMove={this.resizerMouseMoveHandler} onWheel={this.mouseScrollHandler}>
             <div className={styles.overlayContent} style={offsetStyle}>
               <Editor visible={false}/>
               <Selector main={this.state.mainSelector}/>

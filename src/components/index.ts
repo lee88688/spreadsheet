@@ -33,6 +33,13 @@ export interface ScrollEventParams {
   scrollLeft?: number;
 }
 
+export interface ScrollSheetEventParams {
+  direction: ScrollbarDirectionType;
+  // when move down this is positive, otherwise negative
+  verticalDelta: number;
+  horizontalDelta: number;
+}
+
 export enum EventTypes {
   // resizer
   /**
@@ -49,5 +56,9 @@ export enum EventTypes {
   /**
    * @event ScrollEventParams
    */
-  Scroll = 'scroll'
+  Scroll = 'scroll',
+  /**
+   * @event ScrollSheetEventParams
+   */
+  ScrollSheet = 'scroll.sheet'
 }
