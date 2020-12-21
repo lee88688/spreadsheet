@@ -23,7 +23,7 @@ const mousemoveHandler = (e: MouseEvent) => e.stopPropagation();
 const Scrollbar = forwardRef(function Scrollbar(props: ScrollbarProps, ref) {
   const isVertical = props.direction === 'vertical';
 
-  const { events } = useContext(SheetContext);
+  const { events, data } = useContext(SheetContext);
   const scrollEl = useRef<HTMLDivElement>();
   const scrollHandler = useCallback((e: UIEvent) => {
     e.stopPropagation();
@@ -34,7 +34,10 @@ const Scrollbar = forwardRef(function Scrollbar(props: ScrollbarProps, ref) {
       scrollTop: isVertical ? scrollTop : 0
     };
     events.emit(EventTypes.Scroll, params);
-  }, [events, isVertical]);
+    // update DataProxy scroll
+    data.scroll.x = scrollLeft;
+    data.scroll.y = scrollTop;
+  }, [data, events, isVertical]);
 
   useEffect(() => {
     const fn = (params: ScrollSheetEventParams) => {

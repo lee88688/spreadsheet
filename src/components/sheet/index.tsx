@@ -8,6 +8,7 @@ import Selector from '../selector';
 import DataProxy from '../../core/dataProxy';
 import Table from '../table';
 import {
+  CellSelectingEventParams,
   ElementOffsetSize,
   EventTypes,
   ResizerVisibleEventParams,
@@ -194,6 +195,21 @@ export default class Sheet extends Component<any, SheetState>{
     // if (temp === tempY) throttle(moveY(deltaY), 50);
   }
 
+  mousedownHandler = (e: MouseEvent) => {
+    // editor.clear();
+    // contextMenu.hide();
+    // the left mouse button: mousedown → mouseup → click
+    // the right mouse button: mousedown → contenxtmenu → mouseup
+    if (e.buttons === 2) {
+      // right button click
+    } else if (e.detail === 2) {
+      // open editor
+    } else {
+      // selector
+      this.overlayerMouseDown(e);
+    }
+  }
+
   scrollHandler = (params: ScrollEventParams) => {
     if (params.direction === ScrollbarDirectionType.vertical) {
       this.state.data.scrolly(params.scrollTop || 0, () => {
@@ -208,6 +224,38 @@ export default class Sheet extends Component<any, SheetState>{
         this.table?.render();
       });
     }
+  }
+
+  private overlayerMouseDown(e: MouseEvent) {
+    // fixme: remove auto fill select
+    const { offsetX, offsetY } = e;
+    const cellRect = this.state.data.getCellRectByXY(offsetX, offsetY);
+    const range = new CellRange(cellRect.ri, cellRect.ci, cellRect.ri, cellRect.ci);
+
+    const mousemove = (e: MouseEvent) => {
+      const { data } = this.state;
+      const { ri, ci } = this.state.data.getCellRectByXY(e.offsetX, e.offsetY);
+      const cellRange = new CellRange(cellRect.ri, cellRect.ci, ri, ci);
+      if (data.selector.range.equals(cellRange)) {
+        return;
+      }
+      data.selector.range = cellRange;
+      data.selector.visible = true;
+      this.events.emit(EventTypes.CellSelecting, { visible: true, range: cellRange } as CellSelectingEventParams);
+    };
+
+    const mouseup = (e: MouseEvent) => {
+      window.removeEventListener('mousemove', mousemove);
+      window.removeEventListener('mouseup', mouseup);
+      this.events.emit(EventTypes.CellSelected, this.state.data.selector.range);
+    };
+
+    window.addEventListener('mousemove', mousemove);
+    window.addEventListener('mouseup', mouseup);
+    const { data } = this.state;
+    data.selector.visible = true;
+    data.selector.range = range;
+    this.events.emit(EventTypes.CellSelecting, { range: range, visible: true } as CellSelectingEventParams);
   }
 
   private reset() {
@@ -263,10 +311,11 @@ export default class Sheet extends Component<any, SheetState>{
             onMouseMove={this.resizerMouseMoveHandler}
             onMouseOut={this.mouseoutHandler}
             onWheel={this.mouseScrollHandler}
+            onMouseDown={this.mousedownHandler}
           >
             <div className={styles.overlayContent} style={offsetStyle}>
               <Editor visible={false}/>
-              <Selector main={this.state.mainSelector}/>
+              <Selector/>
             </div>
           </div>
           <Resizer direction={ResizerDirectionType.horizontal} minDistance={0}/>

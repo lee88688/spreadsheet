@@ -1,5 +1,6 @@
 import { ResizerDirectionType } from './resizer';
 import { ScrollbarDirectionType } from './scrollbar';
+import { CellRange } from '../core/cellRange';
 
 export interface ElementOffsetSize {
   left: number;
@@ -40,6 +41,11 @@ export interface ScrollSheetEventParams {
   horizontalDelta: number;
 }
 
+export interface CellSelectingEventParams {
+  visible: boolean;
+  range: CellRange;
+}
+
 export enum EventTypes {
   // resizer
   /**
@@ -60,5 +66,18 @@ export enum EventTypes {
   /**
    * @event ScrollSheetEventParams
    */
-  ScrollSheet = 'scroll.sheet'
+  ScrollSheet = 'scroll.sheet',
+
+  // cell
+  /**
+   * @event CellSelectingEventParams
+   */
+  CellSelecting = 'cell.selecting',
+  CellSelected = 'cell.selected',
+
+  // context menu
+  ContextMenuVisible = 'contextmenu.visible',
+
+  // editor
+  EditorVisible = 'editor.visible'
 }

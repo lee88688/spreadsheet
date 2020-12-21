@@ -1,7 +1,7 @@
 import { h } from 'preact';
-import { useContext } from 'preact/hooks';
+import { useContext, useEffect, useState } from 'preact/hooks';
 import styles from './index.scss';
-import { ElementOffsetSize } from '../index';
+import { CellSelectingEventParams, ElementOffsetSize, EventTypes } from '../index';
 import { CellRange } from '../../core/cellRange';
 import { SheetContext } from '../sheet';
 
@@ -21,7 +21,6 @@ interface SelectorElementProps {
 }
 
 interface SelectorProps {
-  main: { visible: boolean; type?: 'selector'; cellRange: CellRange };
   selectors?: { key: string; visible: boolean; type: SelectorType; cellRange: CellRange }[];
 }
 
@@ -58,9 +57,27 @@ function SelectorElement(props: SelectorElementProps) {
 }
 
 export default function Selector(props: SelectorProps) {
+  const render = useState(0)[1];
+  const { events, data } = useContext(SheetContext);
+
+  const { visible, range } = data.selector;
+  console.log('rendered');
+
+  useEffect(() => {
+    let count = 1;
+    const selecting = () => {
+      render(count++);
+    };
+    events.on(EventTypes.CellSelecting, selecting);
+
+    return () => {
+      events.off(EventTypes.CellSelecting, selecting);
+    };
+  }, [events, render]);
+
   return (
     <div className={styles.selectors}>
-      <SelectorElement visible={props.main.visible} type="selector" cellRange={props.main.cellRange}/>
+      <SelectorElement visible={visible} type="selector" cellRange={range}/>
       {props.selectors?.map((item) =>
         <SelectorElement key={item.key} visible={false} type={item.type} cellRange={item.cellRange}/>)
       }
