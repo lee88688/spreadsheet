@@ -33,6 +33,7 @@ export default class Sheet extends Component<any, SheetState>{
   events = new EventEmitter()
   canvasRef = createRef<HTMLCanvasElement>()
   table: Table | null = null
+  tableRenderRequest: number
 
   constructor(props: unknown) {
     super(props);
@@ -43,13 +44,30 @@ export default class Sheet extends Component<any, SheetState>{
       offset: { left: 0, top: 0, width: 0, height: 0 },
       mainSelector: { visible: false, cellRange: new CellRange(0,0,0,0) }
     };
-    this.events.on(EventTypes.Scroll, () => this.table?.render());
-    this.events.on(EventTypes.CellSelecting, () => this.table?.render());
+    this.events.on(EventTypes.Scroll, () => this.events.emit(EventTypes.TableRender));
+    this.events.on(EventTypes.CellSelecting, () => this.events.emit(EventTypes.TableRender));
+
+    // table render events
+    this.tableRenderRequest = 0;
+    this.events.on(EventTypes.TableRender, () => {
+      if (this.tableRenderRequest === 0) {
+        window.requestAnimationFrame(this.tableRenderHandler);
+      }
+      this.tableRenderRequest++;
+    });
   }
 
   componentDidMount() {
     this.table = new Table(this.canvasRef.current as HTMLCanvasElement, this.state.data);
     this.reset();
+  }
+
+  tableRenderHandler = () => {
+    if (this.tableRenderRequest > 0) {
+      // console.log('table render', this.tableRenderRequest);
+      this.table?.render();
+      this.tableRenderRequest = 0;
+    }
   }
 
   resizerMouseMoveHandler = (e: MouseEvent) => {
@@ -222,7 +240,7 @@ export default class Sheet extends Component<any, SheetState>{
     const mousemove = (e: MouseEvent) => {
       const { data } = this.state;
       const { ri, ci } = this.state.data.getCellRectByXY(e.offsetX, e.offsetY);
-      console.log('mousemove', ri, ci, e);
+      // console.log('mousemove', ri, ci, e);
       const cellRange = new CellRange(cellRect.ri, cellRect.ci, ri, ci);
       if (data.selector.range.equals(cellRange)) {
         return;
@@ -259,7 +277,7 @@ export default class Sheet extends Component<any, SheetState>{
       horizontalScrollBar: { distance: offset.width, contentDistance: totalWidth }
     });
 
-    this.table?.render();
+    this.events.emit(EventTypes.TableRender);
   }
 
   getRect() {

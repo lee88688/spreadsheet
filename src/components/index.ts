@@ -79,5 +79,8 @@ export enum EventTypes {
   ContextMenuVisible = 'contextmenu.visible',
 
   // editor
-  EditorVisible = 'editor.visible'
+  EditorVisible = 'editor.visible',
+
+  // table
+  TableRender = 'table.render'
 }
