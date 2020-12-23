@@ -9,7 +9,7 @@ export default class Coordinate {
   }
 
   cellRange2Rect(cellRange: CellRange) {
-    return this.data.getRect(cellRange);
+    return this.data.getRect(cellRange.toForwardDirection());
   }
 
   position2Cell(x: number, y: number) {

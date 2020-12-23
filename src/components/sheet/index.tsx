@@ -43,7 +43,7 @@ export default class Sheet extends Component<any, SheetState>{
       offset: { left: 0, top: 0, width: 0, height: 0 },
       mainSelector: { visible: false, cellRange: new CellRange(0,0,0,0) }
     };
-    this.events.on(EventTypes.Scroll, this.scrollHandler);
+    this.events.on(EventTypes.Scroll, () => this.table?.render());
     this.events.on(EventTypes.CellSelecting, () => this.table?.render());
   }
 
@@ -213,23 +213,6 @@ export default class Sheet extends Component<any, SheetState>{
     }
   }
 
-  scrollHandler = (params: ScrollEventParams) => {
-    // if (params.direction === ScrollbarDirectionType.vertical) {
-    //   this.state.data.scrolly(params.scrollTop || 0, () => {
-    //     // selector.resetBRLAreaOffset();
-    //     // editorSetOffset.call(this);
-    //     this.table?.render();
-    //   });
-    // } else {
-    //   this.state.data.scrollx(params.scrollLeft ?? 0, () => {
-    //     // selector.resetBRTAreaOffset();
-    //     // editorSetOffset.call(this);
-    //     this.table?.render();
-    //   });
-    // }
-    this.table?.render();
-  }
-
   private overlayerMouseDown(e: MouseEvent) {
     // fixme: remove auto fill select
     const { offsetX, offsetY } = e;
@@ -239,6 +222,7 @@ export default class Sheet extends Component<any, SheetState>{
     const mousemove = (e: MouseEvent) => {
       const { data } = this.state;
       const { ri, ci } = this.state.data.getCellRectByXY(e.offsetX, e.offsetY);
+      console.log('mousemove', ri, ci, e);
       const cellRange = new CellRange(cellRect.ri, cellRect.ci, ri, ci);
       if (data.selector.range.equals(cellRange)) {
         return;

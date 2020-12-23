@@ -212,6 +212,20 @@ export class CellRange {
       && this.sci === other.sci;
   }
 
+  toForwardDirection() {
+    const rangeClone = this.clone();
+    const { sri, sci, eri, eci } = rangeClone;
+    if (sri > eri) {
+      rangeClone.sri = eri;
+      rangeClone.eri = sri;
+    }
+    if (sci > eci) {
+      rangeClone.sci = eci;
+      rangeClone.eci = sci;
+    }
+    return rangeClone;
+  }
+
   static valueOf(ref: string) {
     // B1:B8, B1 => 1 x 1 cell range
     const refs = ref.split(':');
