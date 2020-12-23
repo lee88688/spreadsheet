@@ -9,8 +9,7 @@ export default class Coordinate {
   }
 
   cellRange2Rect(cellRange: CellRange) {
-    const { left, top, width, height } = this.data.getRect(cellRange);
-    return { left, top, width, height };
+    return this.data.getRect(cellRange);
   }
 
   position2Cell(x: number, y: number) {

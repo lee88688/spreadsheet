@@ -43,8 +43,8 @@ export default class Sheet extends Component<any, SheetState>{
       offset: { left: 0, top: 0, width: 0, height: 0 },
       mainSelector: { visible: false, cellRange: new CellRange(0,0,0,0) }
     };
-    // this.table = new Table(this.canvasRef, this.state.data);
     this.events.on(EventTypes.Scroll, this.scrollHandler);
+    this.events.on(EventTypes.CellSelecting, () => this.table?.render());
   }
 
   componentDidMount() {
@@ -125,6 +125,7 @@ export default class Sheet extends Component<any, SheetState>{
   mouseScrollHandler = (e: WheelEvent) => {
     e.stopPropagation();
 
+    const { data } = this.state;
     const { rows, cols } = this.state.data;
 
     const { deltaY, deltaX, shiftKey } = e;
@@ -139,60 +140,62 @@ export default class Sheet extends Component<any, SheetState>{
     } else {
       params.verticalDelta = deltaY;
     }
-    this.state.events.emit(EventTypes.ScrollSheet, params);
+    // this.events.emit(EventTypes.ScrollSheet, params);
 
-    // const loopValue = (ii, vFunc) => {
-    //   let i = ii;
-    //   let v = 0;
-    //   do {
-    //     v = vFunc(i);
-    //     i += 1;
-    //   } while (v <= 0);
-    //   return v;
-    // };
-    //
-    // const moveY = (vertical) => {
-    //   if (vertical > 0) {
-    //     // up
-    //     const ri = data.scroll.ri + 1;
-    //     if (ri < rows.len) {
-    //       const rh = loopValue(ri, i => rows.getHeight(i));
-    //       verticalScrollbar.move({ top: top + rh - 1 });
-    //     }
-    //   } else {
-    //     // down
-    //     const ri = data.scroll.ri - 1;
-    //     if (ri >= 0) {
-    //       const rh = loopValue(ri, i => rows.getHeight(i));
-    //       verticalScrollbar.move({ top: ri === 0 ? 0 : top - rh });
-    //     }
-    //   }
-    // };
-    //
-    // const moveX = (horizontal) => {
-    //   if (horizontal > 0) {
-    //     // left
-    //     const ci = data.scroll.ci + 1;
-    //     if (ci < cols.len) {
-    //       const cw = loopValue(ci, i => cols.getWidth(i));
-    //       horizontalScrollbar.move({ left: left + cw - 1 });
-    //     }
-    //   } else {
-    //     // right
-    //     const ci = data.scroll.ci - 1;
-    //     if (ci >= 0) {
-    //       const cw = loopValue(ci, i => cols.getWidth(i));
-    //       horizontalScrollbar.move({ left: ci === 0 ? 0 : left - cw });
-    //     }
-    //   }
-    // };
-    // const tempY = Math.abs(deltaY);
-    // const tempX = Math.abs(deltaX);
-    // const temp = Math.max(tempY, tempX);
-    //
-    // if (/Firefox/i.test(window.navigator.userAgent)) throttle(moveY(evt.detail), 50);
-    // if (temp === tempX) throttle(moveX(deltaX), 50);
-    // if (temp === tempY) throttle(moveY(deltaY), 50);
+    // fixme: why value maybe negative
+    const loopValue = (index: number, vFunc: (i: number) => number) => {
+      let value = 0;
+      for (let i = index; value <= 0; i++) {
+        value = vFunc(i);
+      }
+      return value;
+    };
+
+    const moveY = (vertical: number) => {
+      let rh = 0;
+      if (vertical > 0) {
+        // move down, increase row
+        const ri = data.scroll.ri + 1;
+        if (ri < rows.len) {
+          rh = loopValue(ri, i => rows.getHeight(i));
+        }
+      } else {
+        // move up, decrease row
+        const ri = data.scroll.ri - 1;
+        if (ri >= 0) {
+          rh = -loopValue(ri, i => rows.getHeight(i)); // scroll to top
+        }
+      }
+      // console.log(`rh: ${rh}`);
+      params.verticalDelta = rh;
+      this.events.emit(EventTypes.ScrollSheet, params);
+    };
+
+    const moveX = (horizontal: number) => {
+      let cw = 0;
+      if (horizontal > 0) {
+        // move right, increase col
+        const ci = data.scroll.ci + 1;
+        if (ci < cols.len) {
+          cw = loopValue(ci, i => cols.getWidth(i));
+        }
+      } else {
+        // move left, decrease col
+        const ci = data.scroll.ci - 1;
+        if (ci >= 0) {
+          cw = -loopValue(ci, i => cols.getWidth(i)); // scroll to left
+        }
+      }
+      params.horizontalDelta = cw;
+      this.events.emit(EventTypes.ScrollSheet, params);
+    };
+
+    const tempY = Math.abs(params.verticalDelta);
+    const tempX = Math.abs(params.horizontalDelta);
+    const temp = Math.max(tempY, tempX);
+
+    if (temp === tempX) moveX(params.horizontalDelta);
+    if (temp === tempY) moveY(params.verticalDelta);
   }
 
   mousedownHandler = (e: MouseEvent) => {
@@ -211,19 +214,20 @@ export default class Sheet extends Component<any, SheetState>{
   }
 
   scrollHandler = (params: ScrollEventParams) => {
-    if (params.direction === ScrollbarDirectionType.vertical) {
-      this.state.data.scrolly(params.scrollTop || 0, () => {
-        // selector.resetBRLAreaOffset();
-        // editorSetOffset.call(this);
-        this.table?.render();
-      });
-    } else {
-      this.state.data.scrollx(params.scrollLeft ?? 0, () => {
-        // selector.resetBRTAreaOffset();
-        // editorSetOffset.call(this);
-        this.table?.render();
-      });
-    }
+    // if (params.direction === ScrollbarDirectionType.vertical) {
+    //   this.state.data.scrolly(params.scrollTop || 0, () => {
+    //     // selector.resetBRLAreaOffset();
+    //     // editorSetOffset.call(this);
+    //     this.table?.render();
+    //   });
+    // } else {
+    //   this.state.data.scrollx(params.scrollLeft ?? 0, () => {
+    //     // selector.resetBRTAreaOffset();
+    //     // editorSetOffset.call(this);
+    //     this.table?.render();
+    //   });
+    // }
+    this.table?.render();
   }
 
   private overlayerMouseDown(e: MouseEvent) {

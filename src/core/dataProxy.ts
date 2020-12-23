@@ -552,7 +552,7 @@ export default class DataProxy {
     // no selector
     if (sri < 0 && sci < 0) {
       return {
-        left: 0, l: 0, top: 0, t: 0, scroll,
+        left: 0, l: 0, top: 0, t: 0, scroll, width: 0, height: 0
       };
     }
     const left = cols.sumWidth(0, sci);
@@ -781,36 +781,59 @@ export default class DataProxy {
     });
   }
 
-  scrollx(x: number, cb: () => void) {
+  private getScrollIndexFromDistance(startIndex: number, endIndex: number, distance: number, getIndexDistance: (i: number) => number) {
+    let si = startIndex;
+    let startDistance = 0;
+    for(; si < endIndex; si++) {
+      if (startDistance >= distance) break;
+      startDistance += getIndexDistance(si);
+    }
+    return [si, startDistance, getIndexDistance(si)];
+  }
+
+  /**
+   * get col index from scroll offset
+   * when x >= ci start col offset, the index is ci
+   * @param x
+   */
+  scrollx(x: number) {
     const { scroll, freeze, cols } = this;
     const [, fci] = freeze;
     const [
       ci, left, width,
-    ] = helper.rangeReduceIf(fci, cols.len, 0, 0, x, i => cols.getWidth(i));
+    ] = this.getScrollIndexFromDistance(fci, cols.len, x, i => cols.getWidth(i));
     // console.log('fci:', fci, ', ci:', ci);
-    let x1 = left;
-    if (x > 0) x1 += width;
-    if (scroll.x !== x1) {
-      scroll.ci = x > 0 ? ci : 0;
-      scroll.x = x1;
-      cb();
-    }
+    const xNext = left;
+    scroll.ci = x > 0 ? ci : 0;
+    scroll.x = xNext;
+    // if (x > 0) xNext += width;
+    // if (scroll.x !== xNext) {
+    //   scroll.ci = x > 0 ? ci : 0;
+    //   scroll.x = xNext;
+    // }
   }
 
-  scrolly(y: number, cb: () => void) {
+  /**
+   * get row index from scroll offset
+   * @param y
+   */
+  scrolly(y: number) {
     const { scroll, freeze, rows } = this;
     const [fri] = freeze;
+    // debugger;
     const [
       ri, top, height,
-    ] = helper.rangeReduceIf(fri, rows.len, 0, 0, y, i => rows.getHeight(i));
-    let y1 = top;
-    if (y > 0) y1 += height;
-    // console.log('ri:', ri, ' ,y:', y1);
-    if (scroll.y !== y1) {
-      scroll.ri = y > 0 ? ri : 0;
-      scroll.y = y1;
-      cb();
-    }
+    ] = this.getScrollIndexFromDistance(fri, rows.len, y, i => rows.getHeight(i));
+    const yNext = top;
+    // console.log('ri:', ri, ' ,yNext:', yNext, 'y:', y);
+    scroll.ri = y > 0 ? ri : 0;
+    scroll.y = yNext;
+    // if (scroll.y === yNext) {
+    //   scroll.ri = y > 0 ? ri : 0;
+    //   scroll.y = yNext;
+    //   return true;
+    // }
+    // return false;
   }
 
   cellRect(ri: number, ci: number) {

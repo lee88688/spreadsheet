@@ -33,10 +33,19 @@ const Scrollbar = forwardRef(function Scrollbar(props: ScrollbarProps, ref) {
       scrollLeft: isVertical ? 0 : scrollLeft,
       scrollTop: isVertical ? scrollTop : 0
     };
-    events.emit(EventTypes.Scroll, params);
     // update DataProxy scroll
-    data.scroll.x = scrollLeft;
-    data.scroll.y = scrollTop;
+    const x = isVertical ? data.scroll.x : scrollLeft;
+    const y = isVertical ? scrollTop : data.scroll.y;
+    data.scroll.x = x;
+    data.scroll.y = y;
+    if (isVertical) {
+      data.scrolly(y);
+    } else {
+      data.scrollx(x);
+    }
+
+    // emit event at last
+    events.emit(EventTypes.Scroll, params);
   }, [data, events, isVertical]);
 
   useEffect(() => {
@@ -46,6 +55,7 @@ const Scrollbar = forwardRef(function Scrollbar(props: ScrollbarProps, ref) {
       const { scrollLeft, scrollTop } = scrollEl.current;
       const left = isVertical ? scrollLeft : scrollLeft + horizontalDelta;
       const top = isVertical ? scrollTop + verticalDelta : scrollTop;
+      console.log(`ScrollSheet, top: ${top}`);
       scrollEl.current.scroll(left, top); // calling scroll function will get a scroll event
     };
     events.on(EventTypes.ScrollSheet, fn);

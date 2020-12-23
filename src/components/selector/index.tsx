@@ -4,6 +4,7 @@ import styles from './index.scss';
 import { CellSelectingEventParams, ElementOffsetSize, EventTypes } from '../index';
 import { CellRange } from '../../core/cellRange';
 import { SheetContext } from '../sheet';
+import { useRender } from '../../core/hooks';
 
 /**
  * selector for default select only
@@ -25,17 +26,32 @@ interface SelectorProps {
 }
 
 function SelectorElement(props: SelectorElementProps) {
-  const { data } = useContext(SheetContext);
-  let el = null;
+  const { data, events } = useContext(SheetContext);
+  const render = useRender();
+
+  useEffect(() => {
+    const fn = () => render();
+    events.on(EventTypes.Scroll, fn);
+
+    return () => {
+      events.off(EventTypes.Scroll, fn);
+    };
+  }, [events, render]);
+
   const rect = data.coordinate.cellRange2Rect(props.cellRange);
-  // const ftwidth = data.freezeTotalWidth();
-  // const ftheight = data.freezeTotalHeight();
+  let el = null;
+  // const ftWidth = data.freezeTotalWidth();
+  // const ftHeight = data.freezeTotalHeight();
+  const width = rect.width ? rect.width - 4 : 0;
+  const height = rect.height ? rect.height - 4 : 0;
+  // let left = rect.left - ftWidth;
+  // let top = rect.top - ftHeight;
   const style = {
     display: props.visible ? 'block' : 'none',
     left: `${rect.left}px`,
     top: `${rect.top}px`,
-    width: `${rect.width ?? 0}px`,
-    height: `${rect.height ?? 0}px`
+    width: `${width}px`,
+    height: `${height}px`
   };
   if (props.type === 'selector') {
     el = (
@@ -61,7 +77,6 @@ export default function Selector(props: SelectorProps) {
   const { events, data } = useContext(SheetContext);
 
   const { visible, range } = data.selector;
-  console.log('rendered');
 
   useEffect(() => {
     let count = 1;
