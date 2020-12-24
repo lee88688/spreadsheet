@@ -46,6 +46,16 @@ export interface CellSelectingEventParams {
   range: CellRange;
 }
 
+export interface EditorVisibleEventParams {
+  visible: boolean;
+  rect?: {
+    top: number;
+    left: number;
+    width: number;
+    height: number;
+  };
+}
+
 export enum EventTypes {
   // resizer
   /**

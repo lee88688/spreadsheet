@@ -8,7 +8,7 @@ import Selector from '../selector';
 import DataProxy from '../../core/dataProxy';
 import Table from '../table';
 import {
-  CellSelectingEventParams,
+  CellSelectingEventParams, EditorVisibleEventParams,
   ElementOffsetSize,
   EventTypes,
   ResizerVisibleEventParams,
@@ -218,6 +218,9 @@ export default class Sheet extends Component<any, SheetState>{
 
   mousedownHandler = (e: MouseEvent) => {
     // editor.clear();
+    this.events.emit(EventTypes.EditorVisible, {
+      visible: false,
+    } as EditorVisibleEventParams);
     // contextMenu.hide();
     // the left mouse button: mousedown → mouseup → click
     // the right mouse button: mousedown → contenxtmenu → mouseup
@@ -225,6 +228,7 @@ export default class Sheet extends Component<any, SheetState>{
       // right button click
     } else if (e.detail === 2) {
       // open editor
+      this.showEditor(e);
     } else {
       // selector
       this.overlayerMouseDown(e);
@@ -262,6 +266,22 @@ export default class Sheet extends Component<any, SheetState>{
     data.selector.visible = true;
     data.selector.range = range;
     this.events.emit(EventTypes.CellSelecting, { range: range, visible: true } as CellSelectingEventParams);
+  }
+
+  private showEditor(e: MouseEvent) {
+    e.stopPropagation();
+    const data = this.state.data;
+    const sOffset = data.getSelectedRect();
+    // const tOffset = this.getTableOffset();
+    // decide the suggest position
+    // let sPosition = 'top';
+    // if (sOffset.top > tOffset.height / 2) {
+    //   sPosition = 'bottom';
+    // }
+    this.events.emit(EventTypes.EditorVisible, {
+      visible: true,
+      rect: sOffset
+    } as EditorVisibleEventParams);
   }
 
   private reset() {
