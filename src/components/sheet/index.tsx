@@ -10,9 +10,8 @@ import Table from '../table';
 import {
   CellSelectingEventParams, EditorVisibleEventParams,
   ElementOffsetSize,
-  EventTypes,
+  EventTypes, ResizerResizeEventParams,
   ResizerVisibleEventParams,
-  ScrollEventParams,
   ScrollSheetEventParams
 } from '../index';
 import { CellRange } from '../../core/cellRange';
@@ -37,6 +36,10 @@ export default class Sheet extends Component<any, SheetState>{
 
   constructor(props: unknown) {
     super(props);
+    if (process.env.NODE_ENV === 'development') {
+      (window as any).events = this.events;
+    }
+
     this.state = {
       data: new DataProxy('sheet1', {} as any),
       events: this.events,
@@ -46,6 +49,9 @@ export default class Sheet extends Component<any, SheetState>{
     };
     this.events.on(EventTypes.Scroll, () => this.events.emit(EventTypes.TableRender));
     this.events.on(EventTypes.CellSelecting, () => this.events.emit(EventTypes.TableRender));
+
+    // resizer resize end
+    this.events.on(EventTypes.ResizerResize, this.resizerResizeEnd);
 
     // table render events
     this.tableRenderRequest = 0;
@@ -89,6 +95,7 @@ export default class Sheet extends Component<any, SheetState>{
       visible: false
     };
     if (cRect.ri >= 0 && cRect.ci === -1) {
+      rowResizerParam.ri = cRect.ri;
       cRect.width = cols.indexWidth;
       // rowResizer.show(cRect, {
       //   width: tRect.width,
@@ -114,6 +121,7 @@ export default class Sheet extends Component<any, SheetState>{
       direction: ResizerDirectionType.vertical
     };
     if (cRect.ri === -1 && cRect.ci >= 0) {
+      colResizerParam.ci = cRect.ci;
       cRect.height = rows.height;
       // colResizer.show(cRect, {
       //   height: tRect.height,
@@ -282,6 +290,28 @@ export default class Sheet extends Component<any, SheetState>{
       visible: true,
       rect: sOffset
     } as EditorVisibleEventParams);
+  }
+
+  resizerResizeEnd = (params: ResizerResizeEventParams) => {
+    if (params.type === 'end' && params.distance) {
+      const isVertical = params.direction === 'vertical';
+      let shouldRender = false;
+      if (isVertical && params.ci !== undefined) {
+        this.state.data.cols.setWidth(params.ci, params.distance);
+        shouldRender = true;
+      } else if (!isVertical && params.ri !== undefined) {
+        this.state.data.rows.setHeight(params.ri, params.distance);
+        shouldRender = true;
+        // table.render();
+        // selector.resetAreaOffset();
+        // verticalScrollbarSet.call(this);
+        // editorSetOffset.call(this);
+      }
+      if (shouldRender) {
+        this.events.emit(EventTypes.CellSelecting);
+        this.events.emit(EventTypes.TableRender);
+      }
+    }
   }
 
   private reset() {

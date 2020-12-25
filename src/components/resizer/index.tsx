@@ -50,7 +50,6 @@ export default function Resizer(props: ResizerProps) {
     // setMouseEvent(e);
     let mouseEvent = e;
     let distance = isVertical ? rect.width : rect.height;
-    events.emit(EventTypes.ResizerResize, { type: 'start' } as ResizerResizeEventParams);
 
     const mouseMoveHandler = (e: MouseEvent) => {
       // if (!moving) return;
@@ -75,13 +74,26 @@ export default function Resizer(props: ResizerProps) {
     const mouseUpHandler = (e: MouseEvent) => {
       setMoving(false);
       setLineVisible(false);
-      events.emit(EventTypes.ResizerResize, { type: 'end', distance } as ResizerResizeEventParams);
       window.removeEventListener('mousemove', mouseMoveHandler);
       window.removeEventListener('mouseup', mouseUpHandler);
+      events.emit(EventTypes.ResizerResize, {
+        type: 'end',
+        distance,
+        direction: props.direction,
+        ri: params.ri,
+        ci: params.ci
+      } as ResizerResizeEventParams);
     };
 
     window.addEventListener('mousemove', mouseMoveHandler);
     window.addEventListener('mouseup', mouseUpHandler);
+    events.emit(EventTypes.ResizerResize, {
+      type: 'start',
+      distance,
+      direction: props.direction,
+      ri: params.ri,
+      ci: params.ci
+    } as ResizerResizeEventParams);
   };
 
   useEffect(() => {

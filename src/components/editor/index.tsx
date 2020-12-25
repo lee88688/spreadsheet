@@ -19,17 +19,23 @@ export default function Editor(props: EditorProps) {
     };
     events.on(EventTypes.EditorVisible, editorFn);
 
+    return () => {
+      events.off(EventTypes.EditorVisible, editorFn);
+    };
+  }, [data, events]);
+
+  useEffect(() => {
     const scrollFn = () => {
+      if (!editorParams.visible) return;
       const rect = data.getSelectedRect();
       setEditorParams({ visible: true, rect });
     };
     events.on(EventTypes.Scroll, scrollFn);
 
     return () => {
-      events.off(EventTypes.EditorVisible, editorFn);
       events.off(EventTypes.Scroll, scrollFn);
     };
-  }, [data, events]);
+  }, [data, editorParams.visible, events]);
 
   useEffect(() => {
     if (editorParams.visible) {

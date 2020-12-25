@@ -21,11 +21,16 @@ export interface ResizerVisibleEventParams {
     height: number;
   };
   line?: { width: number; height: number };
+  ri?: number;
+  ci?: number;
 }
 
 export interface ResizerResizeEventParams {
   type: 'start' | 'end';
+  direction: ResizerDirectionType;
   distance?: number;
+  ri?: number;
+  ci?: number;
 }
 
 export interface ScrollEventParams {
