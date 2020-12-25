@@ -64,28 +64,28 @@ export interface EditorVisibleEventParams {
 export enum EventTypes {
   // resizer
   /**
-   * @event ResizerVisibleEventParams
+   *  ResizerVisibleEventParams
    * @example emit(EventTypes.ResizerVisible, { direction: 'vertical', visible: true, unhideVisible: false })
    */
   ResizerVisible = 'resizer.visible',
   /**
-   * @event ResizerResizeEventParams
+   *  ResizerResizeEventParams
    */
   ResizerResize = 'resizer.resize',
 
   // scroll
   /**
-   * @event ScrollEventParams
+   *  ScrollEventParams
    */
   Scroll = 'scroll',
   /**
-   * @event ScrollSheetEventParams
+   *  ScrollSheetEventParams
    */
   ScrollSheet = 'scroll.sheet',
 
   // cell
   /**
-   * @event CellSelectingEventParams
+   *  CellSelectingEventParams
    */
   CellSelecting = 'cell.selecting',
   CellSelected = 'cell.selected',
@@ -94,6 +94,9 @@ export enum EventTypes {
   ContextMenuVisible = 'contextmenu.visible',
 
   // editor
+  /**
+   *  EditorVisibleEventParams
+   */
   EditorVisible = 'editor.visible',
 
   // table

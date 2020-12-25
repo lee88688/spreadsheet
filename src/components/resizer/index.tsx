@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback, useContext } from 'preact/hooks';
 import styles from './index.scss';
 import clsx from 'clsx';
 import { SheetContext } from '../sheet';
-import { EventTypes, ResizerResizeEventParams, ResizerVisibleEventParams } from '../index';
+import { EditorVisibleEventParams, EventTypes, ResizerResizeEventParams, ResizerVisibleEventParams } from '../index';
 
 export enum ResizerDirectionType {
   vertical = 'vertical', // col resizer
@@ -94,6 +94,8 @@ export default function Resizer(props: ResizerProps) {
       ri: params.ri,
       ci: params.ci
     } as ResizerResizeEventParams);
+    // resize start will stop editing
+    events.emit(EventTypes.EditorVisible, { visible: false } as EditorVisibleEventParams);
   };
 
   useEffect(() => {
