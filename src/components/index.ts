@@ -89,6 +89,7 @@ export enum EventTypes {
    */
   CellSelecting = 'cell.selecting',
   CellSelected = 'cell.selected',
+  CellAutofill = 'cell.autofill',
 
   // context menu
   ContextMenuVisible = 'contextmenu.visible',

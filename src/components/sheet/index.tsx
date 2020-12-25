@@ -251,6 +251,7 @@ export default class Sheet extends Component<any, SheetState>{
 
     const mousemove = (e: MouseEvent) => {
       const { data } = this.state;
+      // fixme: offsetX and offsetY relative to window, need translate to sheet top and left
       const { ri, ci } = this.state.data.getCellRectByXY(e.offsetX, e.offsetY);
       // console.log('mousemove', ri, ci, e);
       const cellRange = new CellRange(cellRect.ri, cellRect.ci, ri, ci);
