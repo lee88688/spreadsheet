@@ -13,6 +13,8 @@ import { useRender } from '../../core/hooks';
  */
 export type SelectorType = 'selector' | 'area' | 'inset';
 
+const AUTOFILL_KEY = 'autofill';
+
 interface SelectorElementProps {
   visible: boolean;
   offset?: ElementOffsetSize;
@@ -23,16 +25,6 @@ interface SelectorElementProps {
 
 function SelectorElement(props: SelectorElementProps) {
   const { data, events } = useContext(SheetContext);
-  const render = useRender();
-
-  useEffect(() => {
-    const fn = () => render();
-    events.on(EventTypes.Scroll, fn);
-
-    return () => {
-      events.off(EventTypes.Scroll, fn);
-    };
-  }, [events, render]);
 
   const rect = data.coordinate.cellRange2Rect(props.cellRange);
 
@@ -53,12 +45,11 @@ function SelectorElement(props: SelectorElementProps) {
   if (props.type === 'selector') {
     const cornerMouseDown = (e: MouseEvent) => {
       e.stopPropagation();
-      const range = data.selector.range.clone();
-      const rect = data.getSelectedRect();
 
       const mousemoveHandler = (e: MouseEvent) => {
         const { offsetY, offsetX } = e; // todo: offset is relative overlay not selector
-        console.log('mousemove', offsetX, offsetY, e);
+        // console.log('mousemove', offsetX, offsetY);
+        const rect = data.coordinate.cellRange2GlobalRect(props.cellRange);
         /**
          * mX, mY is relative to selector's left and top
          * width, height is selector width and height
@@ -70,8 +61,8 @@ function SelectorElement(props: SelectorElementProps) {
          */
         let isVertical = true;
         let distance = 0;
-        const mX = offsetX + rect.width;
-        const mY = offsetY + rect.height;
+        const mX = offsetX - rect.left;
+        const mY = offsetY - rect.top;
         if (mY > rect.height || mX > rect.width || mY < 0 || mX < 0) {
           //      mX<0, outside |            mX inside | mX>width, outside
           const x = mX < 0 ? mX : (mX < rect.width ? 0 : mX - rect.width);
@@ -84,6 +75,8 @@ function SelectorElement(props: SelectorElementProps) {
             isVertical = true;
             distance = y;
           }
+          // console.log(`left: ${rect.left}, top: ${rect.top}`);
+          // console.log(`mX: ${mX}, mY: ${mY}, x: ${x}, y: ${y}`);
         } else {
           // inside
           if (mX > mY) {
@@ -95,17 +88,41 @@ function SelectorElement(props: SelectorElementProps) {
           }
         }
 
+        const range = data.selector.range.clone();
         if (isVertical) {
-          // data.getCellRectByXY();
+          const { ri } = data.coordinate.positionX2CellRow(offsetY, data.scroll.y);
+          const selectorItem = data.selector.getSelector(AUTOFILL_KEY);
+          range.eri = ri;
+          selectorItem && (selectorItem.range = range);
+        } else {
+          const { ci } = data.coordinate.positionY2CellCol(offsetX, data.scroll.x);
+          const selectorItem = data.selector.getSelector(AUTOFILL_KEY);
+          range.eci = ci;
+          selectorItem && (selectorItem.range = range);
         }
+        // console.log(range.toString());
+        events.emit(EventTypes.CellSelecting);
       };
+
       const mouseupHandler = (e: MouseEvent) => {
         window.removeEventListener('mousemove', mousemoveHandler);
-        window.removeEventListener('mouseup', mousemoveHandler);
+        window.removeEventListener('mouseup', mouseupHandler);
+        data.selector.removeSelector(AUTOFILL_KEY);
+        events.emit(EventTypes.CellSelecting);
+        events.emit(EventTypes.CellAutofill);
       };
+
+      const range = data.selector.range.clone();
+      data.selector.addNewSelector({
+        visible: true,
+        key: AUTOFILL_KEY,
+        type: 'inset',
+        range
+      });
 
       window.addEventListener('mousemove', mousemoveHandler);
       window.addEventListener('mouseup', mouseupHandler);
+      events.emit(EventTypes.CellSelecting);
     };
     el = (
       <div className={styles.selectorArea} style={style}>
@@ -126,16 +143,22 @@ function SelectorElement(props: SelectorElementProps) {
 }
 
 export default function Selector() {
-  const render = useState(0)[1];
+  const render = useRender();
   const { events, data } = useContext(SheetContext);
 
   const { visible, range, selectors } = data.selector;
 
   useEffect(() => {
-    let count = 1;
-    const selecting = () => {
-      render(count++);
+    const fn = () => render();
+    events.on(EventTypes.Scroll, fn);
+
+    return () => {
+      events.off(EventTypes.Scroll, fn);
     };
+  }, [events, render]);
+
+  useEffect(() => {
+    const selecting = () => render();
     events.on(EventTypes.CellSelecting, selecting);
 
     return () => {
@@ -146,7 +169,7 @@ export default function Selector() {
   return (
     <div className={styles.selectors}>
       {selectors?.map((item) =>
-        <SelectorElement key={item.key} visible={false} type={item.type} cellRange={item.range}/>)
+        <SelectorElement key={item.key} visible={item.visible} type={item.type} cellRange={item.range}/>)
       }
       <SelectorElement key="_main-selector" visible={visible} type="selector" cellRange={range}/>
     </div>

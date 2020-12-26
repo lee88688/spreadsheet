@@ -55,7 +55,6 @@ const Scrollbar = forwardRef(function Scrollbar(props: ScrollbarProps, ref) {
       const { scrollLeft, scrollTop } = scrollEl.current;
       const left = isVertical ? scrollLeft : scrollLeft + horizontalDelta;
       const top = isVertical ? scrollTop + verticalDelta : scrollTop;
-      console.log(`ScrollSheet, top: ${top}`);
       scrollEl.current.scroll(left, top); // calling scroll function will get a scroll event
     };
     events.on(EventTypes.ScrollSheet, fn);

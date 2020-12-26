@@ -67,7 +67,7 @@ export default class DataProxy {
   coordinate: Coordinate
   history: History
   clipboard: Clipboard
-  exceptRowSet: Set<number>
+  exceptRowSet: Set<number> // for filtered rows
   sortedRowMap: Map<string | number, any> // fixme: decide using string or number
   unsortedRowMap: Map<string | number, any>
   autoFilter: AutoFilter

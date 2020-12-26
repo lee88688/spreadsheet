@@ -43,11 +43,15 @@ export default class Selector {
     this.selectors.push(item);
   }
 
-  removeSelector(item: SelectorItem) {
-    const index = this.selectors.findIndex(({ key }) => item.key === key);
+  removeSelector(key: string) {
+    const index = this.selectors.findIndex(item => item.key === key);
     if (index >= 0) {
       this.selectors.splice(index, 1);
     }
+  }
+
+  getSelector(key: string) {
+    return this.selectors.find(item => item.key === key);
   }
 
   hasSelector(key: string) {
