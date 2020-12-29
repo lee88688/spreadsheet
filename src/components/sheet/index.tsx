@@ -23,7 +23,6 @@ interface SheetState {
   offset: ElementOffsetSize;
   verticalScrollBar?: { distance: number; contentDistance: number };
   horizontalScrollBar?: { distance: number; contentDistance: number };
-  mainSelector: { visible: boolean; cellRange: CellRange };
 }
 
 export const SheetContext = createContext<{ data: DataProxy; events: EventEmitter }>({ data: {} as any, events: {} as EventEmitter });
@@ -31,21 +30,25 @@ export const SheetContext = createContext<{ data: DataProxy; events: EventEmitte
 export default class Sheet extends Component<any, SheetState>{
   events = new EventEmitter()
   canvasRef = createRef<HTMLCanvasElement>()
+  containerRef = createRef<HTMLDivElement>()
   table: Table | null = null
   tableRenderRequest: number
 
   constructor(props: unknown) {
     super(props);
-    if (process.env.NODE_ENV === 'development') {
-      (window as any).events = this.events;
-    }
+
+    const data = new DataProxy('sheet1', {
+      view: {
+        width: () => this.containerRef.current?.clientWidth ?? 0,
+        height: () => this.containerRef.current?.clientHeight ?? 0
+      }
+    } as any);
 
     this.state = {
-      data: new DataProxy('sheet1', {} as any),
+      data,
       events: this.events,
       rect: { width: 0, height: 0 },
-      offset: { left: 0, top: 0, width: 0, height: 0 },
-      mainSelector: { visible: false, cellRange: new CellRange(0,0,0,0) }
+      offset: { left: 0, top: 0, width: 0, height: 0 }
     };
     this.events.on(EventTypes.Scroll, () => this.events.emit(EventTypes.TableRender));
     this.events.on(EventTypes.CellSelecting, () => this.events.emit(EventTypes.TableRender));
@@ -61,6 +64,11 @@ export default class Sheet extends Component<any, SheetState>{
       }
       this.tableRenderRequest++;
     });
+
+    if (process.env.NODE_ENV === 'development') {
+      (window as any).events = this.events;
+      (window as any).data = this.state.data;
+    }
   }
 
   componentDidMount() {
@@ -310,6 +318,7 @@ export default class Sheet extends Component<any, SheetState>{
       }
       if (shouldRender) {
         this.events.emit(EventTypes.CellSelecting);
+        this.events.emit(EventTypes.ScrollDistanceChange);
         this.events.emit(EventTypes.TableRender);
       }
     }
@@ -329,6 +338,9 @@ export default class Sheet extends Component<any, SheetState>{
     });
 
     this.events.emit(EventTypes.TableRender);
+    setTimeout(() => {
+      this.events.emit(EventTypes.ScrollDistanceChange);
+    }, 0);
   }
 
   getRect() {
@@ -360,7 +372,7 @@ export default class Sheet extends Component<any, SheetState>{
 
     return (
       <SheetContext.Provider value={this.state}>
-        <div className={styles.sheet}>
+        <div ref={this.containerRef} className={styles.sheet}>
           <canvas ref={this.canvasRef} className={styles.table} style={rectStyle}/>
           <div
             class={styles.overlay}
@@ -377,16 +389,8 @@ export default class Sheet extends Component<any, SheetState>{
           </div>
           <Resizer direction={ResizerDirectionType.horizontal} minDistance={0}/>
           <Resizer direction={ResizerDirectionType.vertical} minDistance={0}/>
-          <Scrollbar
-            direction={ScrollbarDirectionType.vertical}
-            distance={this.state.verticalScrollBar?.distance ?? 0}
-            contentDistance={this.state.verticalScrollBar?.contentDistance ?? 0}
-          />
-          <Scrollbar
-            direction={ScrollbarDirectionType.horizontal}
-            distance={this.state.horizontalScrollBar?.distance ?? 0}
-            contentDistance={this.state.horizontalScrollBar?.contentDistance ?? 0}
-          />
+          <Scrollbar direction={ScrollbarDirectionType.vertical}/>
+          <Scrollbar direction={ScrollbarDirectionType.horizontal}/>
         </div>
       </SheetContext.Provider>
     );

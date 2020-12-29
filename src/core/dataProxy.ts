@@ -51,8 +51,8 @@ const defaultSettings: SheetSetting = {
   },
 };
 
-const toolbarHeight = 41;
-const bottombarHeight = 41;
+// const toolbarHeight = 41;
+// const bottombarHeight = 41;
 
 export default class DataProxy {
   name: string
@@ -942,11 +942,11 @@ export default class DataProxy {
 
   viewHeight() {
     const { view, showToolbar } = this.settings;
-    let h = view.height();
-    h -= bottombarHeight;
-    if (showToolbar) {
-      h -= toolbarHeight;
-    }
+    const h = view.height();
+    // h -= bottombarHeight;
+    // if (showToolbar) {
+    //   h -= toolbarHeight;
+    // }
     return h;
   }
 

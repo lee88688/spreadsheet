@@ -1,5 +1,5 @@
 import { h } from 'preact';
-import { useCallback, useRef, useImperativeHandle, useContext, useEffect } from 'preact/hooks';
+import { useCallback, useRef, useImperativeHandle, useContext, useEffect, useState } from 'preact/hooks';
 import { forwardRef } from 'preact/compat';
 import styles from './index.scss';
 import clsx from 'clsx';
@@ -13,9 +13,6 @@ export enum ScrollbarDirectionType {
 
 interface ScrollbarProps {
   direction: ScrollbarDirectionType;
-  onScroll?: (isVertical: boolean, scroll: number, event: UIEvent) => void;
-  distance: number;
-  contentDistance: number;
 }
 
 const mousemoveHandler = (e: MouseEvent) => e.stopPropagation();
@@ -23,6 +20,7 @@ const mousemoveHandler = (e: MouseEvent) => e.stopPropagation();
 const Scrollbar = forwardRef(function Scrollbar(props: ScrollbarProps, ref) {
   const isVertical = props.direction === 'vertical';
 
+  const [distanceState, setDistanceState] = useState({ distance: 0, contentDistance: 0 });
   const { events, data } = useContext(SheetContext);
   const scrollEl = useRef<HTMLDivElement>();
   const scrollHandler = useCallback((e: UIEvent) => {
@@ -63,19 +61,34 @@ const Scrollbar = forwardRef(function Scrollbar(props: ScrollbarProps, ref) {
     };
   }, [events, isVertical, props.direction]);
 
-  // useImperativeHandle(ref, () => ({
-  //   move(x: number, y: number) {
-  //     scrollEl.current?.scroll(x, y);
-  //   }
-  // }), [scrollEl]);
+  useEffect(() => {
+    const distanceChangeFn = () => {
+      // const { width, height } = data.getRect();
+      if (isVertical) {
+        const height = data.viewHeight();
+        const colResizerHeight = data.exceptRowTotalHeight(0, -1);
+        const totalHeight = data.rows.totalHeight();
+        setDistanceState({ distance: height, contentDistance: totalHeight - colResizerHeight });
+      } else {
+        const width = data.viewWidth();
+        const totalWidth = data.cols.totalWidth();
+        setDistanceState({ distance: width, contentDistance: totalWidth });
+      }
+    };
+    events.on(EventTypes.ScrollDistanceChange, distanceChangeFn);
 
-  const d = props.distance - 1;
+    return () => {
+      events.off(EventTypes.ScrollDistanceChange, distanceChangeFn);
+    };
+  }, [data, events, isVertical]);
+
+  const d = distanceState.distance - 1;
   let visible = false;
   let distance = 0;
   let contentDistance = 0;
-  if (props.contentDistance > d) {
+  if (distanceState.contentDistance > d) {
     distance = d - 15;
-    contentDistance = props.contentDistance;
+    contentDistance = distanceState.contentDistance;
     visible = true;
   }
 

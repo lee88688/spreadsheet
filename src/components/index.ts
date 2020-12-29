@@ -82,6 +82,7 @@ export enum EventTypes {
    *  ScrollSheetEventParams
    */
   ScrollSheet = 'scroll.sheet',
+  ScrollDistanceChange = 'scroll.distance-change',
 
   // cell
   /**
