@@ -8,9 +8,11 @@ import Selector from '../selector';
 import DataProxy from '../../core/dataProxy';
 import Table from '../table';
 import {
-  CellSelectingEventParams, EditorVisibleEventParams,
+  CellSelectingEventParams,
+  EditorVisibleEventParams,
   ElementOffsetSize,
-  EventTypes, ResizerResizeEventParams,
+  EventTypes,
+  ResizerResizeEventParams,
   ResizerVisibleEventParams,
   ScrollSheetEventParams
 } from '../index';
@@ -255,20 +257,38 @@ export default class Sheet extends Component<any, SheetState>{
     // fixme: remove auto fill select
     const { offsetX, offsetY } = e;
     const cellRect = this.state.data.getCellRectByXY(offsetX, offsetY);
-    const range = new CellRange(cellRect.ri, cellRect.ci, cellRect.ri, cellRect.ci);
+    const startRange = new CellRange(cellRect.ri, cellRect.ci, cellRect.ri, cellRect.ci);
+    if (cellRect.ri === -1) {
+      startRange.sri = 0;
+      startRange.eri = this.state.data.rows.len - 1;
+    }
+    if (cellRect.ci === -1) {
+      startRange.sci = 0;
+      startRange.eci = this.state.data.cols.len - 1;
+    }
 
     const mousemove = (e: MouseEvent) => {
       const { data } = this.state;
+      const range = startRange.clone();
       // fixme: offsetX and offsetY relative to window, need translate to sheet top and left
       const { ri, ci } = this.state.data.getCellRectByXY(e.offsetX, e.offsetY);
-      // console.log('mousemove', ri, ci, e);
-      const cellRange = new CellRange(cellRect.ri, cellRect.ci, ri, ci);
+      // console.log('mousemove', cellRect.ri, cellRect.ci, 'current', ri, ci, e.offsetX, e.offsetY);
+      const cellRange = new CellRange(range.sri, range.sci, ri, ci);
+      if (ri === -1) {
+        cellRange.eri = this.state.data.rows.len - 1;
+      }
+      if (ci === -1) {
+        cellRange.eci = this.state.data.cols.len - 1;
+      }
       if (data.selector.range.equals(cellRange)) {
         return;
       }
-      data.selector.range = cellRange;
+      data.selector.range = cellRange.toForwardDirection();
       data.selector.visible = true;
-      this.events.emit(EventTypes.CellSelecting, { visible: true, range: cellRange } as CellSelectingEventParams);
+      this.events.emit(EventTypes.CellSelecting, {
+        visible: true,
+        range: cellRange.toForwardDirection()
+      } as CellSelectingEventParams);
     };
 
     const mouseup = (e: MouseEvent) => {
@@ -281,8 +301,8 @@ export default class Sheet extends Component<any, SheetState>{
     window.addEventListener('mouseup', mouseup);
     const { data } = this.state;
     data.selector.visible = true;
-    data.selector.range = range;
-    this.events.emit(EventTypes.CellSelecting, { range: range, visible: true } as CellSelectingEventParams);
+    data.selector.range = startRange.toForwardDirection();
+    this.events.emit(EventTypes.CellSelecting, { range: startRange.toForwardDirection(), visible: true } as CellSelectingEventParams);
   }
 
   private showEditor(e: MouseEvent) {

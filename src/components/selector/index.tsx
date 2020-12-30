@@ -60,6 +60,13 @@ function SelectorElement(props: SelectorElementProps) {
          * 2. mY < height and mX < width and mX > 0 and mY > 0
          */
         let isVertical = true;
+        /**
+         * autofill will be reverse or not
+         * vertical, mY < 0
+         * horizontal, mX < 0
+         */
+        let reverse = false;
+        let inside = false;
         let distance = 0;
         const mX = offsetX - rect.left;
         const mY = offsetY - rect.top;
@@ -71,14 +78,17 @@ function SelectorElement(props: SelectorElementProps) {
           if (Math.abs(x) > Math.abs(y)) {
             isVertical = false;
             distance = x;
+            mX < 0 && (reverse = true);
           } else {
             isVertical = true;
             distance = y;
+            mY < 0 && (reverse = true);
           }
           // console.log(`left: ${rect.left}, top: ${rect.top}`);
           // console.log(`mX: ${mX}, mY: ${mY}, x: ${x}, y: ${y}`);
         } else {
           // inside
+          inside = true;
           if (mX > mY) {
             isVertical = false;
             distance = mX;
@@ -92,15 +102,24 @@ function SelectorElement(props: SelectorElementProps) {
         if (isVertical) {
           const { ri } = data.coordinate.positionX2CellRow(offsetY, data.scroll.y);
           const selectorItem = data.selector.getSelector(AUTOFILL_KEY);
-          range.eri = ri;
+          if (reverse && !inside) {
+            range.sri = ri;
+          } else {
+            range.eri = ri;
+          }
           selectorItem && (selectorItem.range = range);
         } else {
           const { ci } = data.coordinate.positionY2CellCol(offsetX, data.scroll.x);
           const selectorItem = data.selector.getSelector(AUTOFILL_KEY);
-          range.eci = ci;
+          console.log('before', selectorItem?.range.toString());
+          if (reverse && !inside) {
+            range.sci = ci;
+          } else {
+            range.eci = ci;
+          }
           selectorItem && (selectorItem.range = range);
         }
-        // console.log(range.toString());
+        console.log('after', range.toString(), `inside: ${inside}, reverse: ${reverse}`);
         events.emit(EventTypes.CellSelecting);
       };
 
