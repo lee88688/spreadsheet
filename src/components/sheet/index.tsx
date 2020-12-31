@@ -17,6 +17,7 @@ import {
   ScrollSheetEventParams
 } from '../index';
 import { CellRange } from '../../core/cellRange';
+import { Toolbar } from '../toolbar';
 
 interface SheetState {
   data: DataProxy;
@@ -392,6 +393,7 @@ export default class Sheet extends Component<any, SheetState>{
 
     return (
       <SheetContext.Provider value={this.state}>
+        <Toolbar/>
         <div ref={this.containerRef} className={styles.sheet}>
           <canvas ref={this.canvasRef} className={styles.table} style={rectStyle}/>
           <div

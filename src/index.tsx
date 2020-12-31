@@ -3,6 +3,7 @@ import { h, Component } from 'preact';
 import styles from './index.scss';
 import BottomBar from './components/bottomBar';
 import Sheet from './components/sheet';
+import './icons/icons.font.js';
 
 class SpreadSheet extends Component<any, any>{
   constructor(props: any) {

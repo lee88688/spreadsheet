@@ -1,4 +1,4 @@
-import { resolve } from "path";
+import { resolve } from 'path';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 
 export default {
@@ -13,7 +13,7 @@ export default {
    **/
   webpack(config, env, helpers, options) {
       delete config.entry.polyfills;
-      config.output.filename = "[name].js";
+      config.output.filename = '[name].js';
 
       config.plugins = config.plugins.filter(plugin => !(plugin instanceof MiniCssExtractPlugin));
       config.module.rules = config.module.rules.map(rule => {
@@ -38,9 +38,7 @@ export default {
           return {
             ...rule,
             use: rule.use.reduce((acc, loader) => {
-              loader !== MiniCssExtractPlugin.loader ? acc.push(loader) : acc.push(
-                'style-loader');
-
+              loader !== MiniCssExtractPlugin.loader ? acc.push(loader) : acc.push('style-loader');
               return acc;
             }, []),
           };
@@ -49,11 +47,24 @@ export default {
         return rule;
       });
 
+    config.module.rules.push({
+      test: /\.font\.js/,
+      use: [
+        // MiniCssExtractPlugin.loader,
+        'style-loader',
+        {
+          loader: 'css-loader',
+          options: { url: false }
+        },
+        'webfonts-loader'
+      ]
+    });
+
       // Use any `index` file, not just index.js
-      config.resolve.alias["preact-cli-entrypoint"] = resolve(
+      config.resolve.alias['preact-cli-entrypoint'] = resolve(
           process.cwd(),
-          "src",
-          "index"
+          'src',
+          'index'
       );
 
       delete config.resolve.alias['url'];
