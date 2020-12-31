@@ -23,7 +23,7 @@ export default function Tooltip(props: TooltipProps) {
       content={props.content}
       offset={[0, 5]}
       onMouseEnter={() => setVisible(true)}
-      onMouseOut={() => setVisible(false)}
+      onMouseLeave={() => setVisible(false)}
     >
       {props.children}
     </Popover>
