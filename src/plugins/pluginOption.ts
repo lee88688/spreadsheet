@@ -1,21 +1,37 @@
-type ToolbarItemType = 'switch' | 'list' | 'custom' | 'none';
+import { EventTypes } from '../components';
 
-type ToolbarDataType<T extends ToolbarItemType = 'none'> = T extends 'switch' ?
-  { switch: boolean } : T
+type PluginToolbarItemType = 'switch' | 'list' | 'custom' | 'none';
 
-type S = ToolbarDataType<'switch'>;
+type PluginToolbarDataTypeBase = { [key: string]: any; disabled: boolean }
+type PluginToolbarSwitchType = {
+  type: 'switch';
+  data: PluginToolbarDataTypeBase & { switch: boolean };
+}
+type PluginToolbarListType = {
+  type: 'list';
+  data: PluginToolbarDataTypeBase & { list: string[] };
+}
+type PluginToolbarCustomType = {
+  type: 'custom';
+  data: PluginToolbarDataTypeBase;
+}
 
-interface PluginOption {
-  name: string;
-  toolbar: {
-    type: ToolbarItemType;
-    data: {
-      [key: string]: any;
-      disabled?: boolean;
-      switch?: boolean;
-      list?: string[];
-    };
+type PluginToolbarDataType<T extends PluginToolbarItemType> =
+  T extends 'switch' ? PluginToolbarSwitchType
+    : T extends 'list' ? PluginToolbarListType
+    : T extends 'custom' ? PluginToolbarCustomType
+    : never;
+
+type PluginToolbarType<T extends PluginToolbarItemType = 'none'> = T extends 'none' ? {} : { toolbar: PluginToolbarDataType<T> }
+
+type PluginEvents = {
+  on?: {
+    [key in EventTypes]?: (e: unknown) => void;
   };
 }
+
+type PluginOption<T extends PluginToolbarItemType = 'none'> = { name: string }
+  & PluginToolbarType<T>
+  & PluginEvents
 
 export default PluginOption;
